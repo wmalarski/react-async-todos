@@ -1,33 +1,44 @@
 {
-	"name": "react-async-todos",
-	"private": true,
-	"version": "0.0.0",
-	"type": "module",
-	"scripts": {
-		"dev": "vite",
-		"build": "tsc -b && vite build",
-		"lint": "eslint .",
-		"preview": "pnpm run build && vite preview",
-		"deploy": "pnpm run build && wrangler deploy",
-		"cf-typegen": "wrangler types"
-	},
-	"dependencies": {
-		"react": "^19.1.1",
-		"react-dom": "^19.1.1"
-	},
-	"devDependencies": {
-		"@cloudflare/vite-plugin": "^1.15.3",
-		"@eslint/js": "^9.33.0",
-		"@types/react": "^19.1.10",
-		"@types/react-dom": "^19.1.7",
-		"@vitejs/plugin-react": "^5.0.0",
-		"eslint": "^9.33.0",
-		"eslint-plugin-react-hooks": "^5.2.0",
-		"eslint-plugin-react-refresh": "^0.4.20",
-		"globals": "^16.3.0",
-		"typescript": "~5.8.3",
-		"typescript-eslint": "^8.39.1",
-		"vite": "^7.1.2",
-		"wrangler": "^4.51.0"
-	}
+  "dependencies": {
+    "@orpc/client": "^1.11.3",
+    "@orpc/server": "^1.11.3",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.44.7",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "valibot": "^1.2.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.8",
+    "@cloudflare/vite-plugin": "^1.15.3",
+    "@eslint/js": "^9.33.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.0",
+    "drizzle-kit": "^0.31.7",
+    "globals": "^16.3.0",
+    "knip": "^5.70.2",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.39.1",
+    "vite": "^7.1.2",
+    "wrangler": "^4.51.0"
+  },
+  "name": "react-async-todos",
+  "private": true,
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "cf-typegen": "wrangler types",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "deploy": "pnpm run build && wrangler deploy",
+    "dev": "vite",
+    "knip": "knip",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "preview": "pnpm run build && vite preview",
+    "tsc": "tsc --noEmit"
+  },
+  "type": "module",
+  "version": "0.0.0"
 }
