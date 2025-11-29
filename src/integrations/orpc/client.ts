@@ -9,7 +9,7 @@ import type { RouterClient } from "@orpc/server";
 
 import type { router } from "./router";
 
-const devEndpoint = "localhost:3000";
+const devEndpoint = "localhost:5173";
 
 const hrefToApi = () => {
   if (typeof location === "undefined") {

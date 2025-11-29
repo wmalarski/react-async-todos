@@ -13,6 +13,6 @@ export default {
       return rpcResult.response;
     }
 
-    return new Response(null, { status: 404 });
+    return env.ASSETS.fetch(request);
   },
 } satisfies ExportedHandler<Env>;
