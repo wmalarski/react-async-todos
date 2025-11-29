@@ -6,6 +6,7 @@ import {
 import { RPCLink } from "@orpc/client/fetch";
 import { BatchLinkPlugin } from "@orpc/client/plugins";
 import type { RouterClient } from "@orpc/server";
+
 import type { router } from "./router";
 
 const devEndpoint = "localhost:3000";

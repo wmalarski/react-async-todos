@@ -6,7 +6,7 @@
         "organizeImports": {
           "level": "on",
           "options": {
-            "groups": [":URL:", ":NODE:", "@/**"]
+            "groups": [":ALIAS:", ":BLANK_LINE:", ":PACKAGE:", ":BLANK_LINE:"]
           }
         },
         "useSortedAttributes": "on",

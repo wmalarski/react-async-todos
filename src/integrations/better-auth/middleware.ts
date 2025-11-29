@@ -1,5 +1,6 @@
 import { ORPCError, os } from "@orpc/server";
 import type { Session, User } from "better-auth";
+
 import type { Db } from "../drizzle/init";
 import { initBetterAuth } from "./init";
 

@@ -1,5 +1,7 @@
 import { type ORPCContext, osBase } from "@/integrations/orpc/base";
+
 import { APIError } from "better-auth";
+
 import { signInSchema, signUpSchema } from "./validation";
 
 const getUser = osBase.handler(async ({ context }) => {

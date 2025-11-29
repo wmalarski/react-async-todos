@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+
 import type { Db } from "../drizzle/init";
 import { schema } from "../drizzle/schema";
 
