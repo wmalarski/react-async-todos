@@ -1,13 +1,26 @@
 import { Button } from "@/components/ui/button";
 
-import { useState } from "react";
+import { Suspense, use, useState } from "react";
+
+import { orpc } from "./integrations/orpc/client";
+import { rpcSuccessResult } from "./integrations/orpc/rpc";
+
+const getUserQuery = async () => {
+  const user = await orpc.auth.getUser();
+  return rpcSuccessResult(user);
+};
 
 function App() {
+  const [userQuery] = useState(() => getUserQuery());
+
   const [count, setCount] = useState(0);
   const [name, setName] = useState("unknown");
 
   return (
     <>
+      <Suspense fallback={"Hello from Suspense"}>
+        <UserRouting userQuery={userQuery} />
+      </Suspense>
       <div>
         <Button
           aria-label="increment"
@@ -36,5 +49,15 @@ function App() {
     </>
   );
 }
+
+type UserRoutingProps = {
+  userQuery: ReturnType<typeof getUserQuery>;
+};
+
+const UserRouting = ({ userQuery }: UserRoutingProps) => {
+  const user = use(userQuery);
+
+  return <pre>{JSON.stringify(user, null, 2)}</pre>;
+};
 
 export default App;
