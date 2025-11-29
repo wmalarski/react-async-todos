@@ -8,10 +8,21 @@
     "not_found_handling": "single-page-application"
   },
   "compatibility_date": "2025-11-27",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_id": "bc72c736-f883-4dc1-9e59-8f06e1acc044",
+      "database_name": "prod-d1",
+      "migrations_dir": "drizzle"
+    }
+  ],
   "main": "worker/index.ts",
   "name": "react-async-todos",
   "observability": {
     "enabled": true
+  },
+  "vars": {
+    "BETTER_AUTH_URL": "https://solid-tasks.w-malarski.workers.dev"
   }
   /**
    * Smart Placement
