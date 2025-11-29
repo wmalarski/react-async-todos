@@ -10,10 +10,10 @@
   "compatibility_date": "2025-11-27",
   "d1_databases": [
     {
-      "binding": "DB",
-      "database_id": "bc72c736-f883-4dc1-9e59-8f06e1acc044",
-      "database_name": "prod-d1",
-      "migrations_dir": "drizzle"
+      "binding": "prod",
+      "database_id": "24475a30-6e52-4753-afb3-a78eaaaeb707",
+      "database_name": "prod",
+      "remote": true
     }
   ],
   "main": "worker/index.ts",

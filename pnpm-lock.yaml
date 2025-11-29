@@ -60,6 +60,9 @@ importers:
       '@cloudflare/vite-plugin':
         specifier: ^1.15.3
         version: 1.15.3(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2))(workerd@1.20251125.0)(wrangler@4.51.0)
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
       '@types/react':
         specifier: ^19.2.7
         version: 19.2.7
