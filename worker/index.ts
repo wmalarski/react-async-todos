@@ -2,8 +2,6 @@ import { handler } from "../src/integrations/orpc/handler";
 
 export default {
   async fetch(request, env) {
-    console.log("[FETCH]", request, env);
-
     const rpcResult = await handler.handle(request, {
       context: { env, headers: request.headers },
       prefix: "/rpc",

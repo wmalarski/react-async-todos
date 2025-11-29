@@ -1,26 +1,15 @@
 import { Button } from "@/components/ui/button";
 
-import { Suspense, use, useState } from "react";
+import { useState } from "react";
 
-import { orpc } from "./integrations/orpc/client";
-import { rpcSuccessResult } from "./integrations/orpc/rpc";
+import { ProtectedLayout } from "./modules/auth/protected-layout";
 
-const getUserQuery = async () => {
-  const user = await orpc.auth.getUser();
-  return rpcSuccessResult(user);
-};
-
-function App() {
-  const [userQuery] = useState(() => getUserQuery());
-
+export default function App() {
   const [count, setCount] = useState(0);
   const [name, setName] = useState("unknown");
 
   return (
-    <>
-      <Suspense fallback={"Hello from Suspense"}>
-        <UserRouting userQuery={userQuery} />
-      </Suspense>
+    <ProtectedLayout>
       <div>
         <Button
           aria-label="increment"
@@ -46,18 +35,6 @@ function App() {
           Name from API is: {name}
         </Button>
       </div>
-    </>
+    </ProtectedLayout>
   );
 }
-
-type UserRoutingProps = {
-  userQuery: ReturnType<typeof getUserQuery>;
-};
-
-const UserRouting = ({ userQuery }: UserRoutingProps) => {
-  const user = use(userQuery);
-
-  return <pre>{JSON.stringify(user, null, 2)}</pre>;
-};
-
-export default App;
