@@ -4,37 +4,63 @@ import { rpcSuccessResult } from "@/integrations/orpc/rpc";
 
 import { type PropsWithChildren, Suspense, use, useState } from "react";
 
+import { SignInForm } from "./sign-in-form";
+import { SignUpForm } from "./sign-up-form";
+
 const getUserQuery = async () => {
   const user = await orpc.auth.getUser();
   return rpcSuccessResult(user);
 };
 
 export const ProtectedLayout = ({ children }: PropsWithChildren) => {
-  const [userQuery] = useState(() => getUserQuery());
+  const [userQuery, setUserQuery] = useState(() => getUserQuery());
+
+  const onFormSuccess = () => {
+    setUserQuery(getUserQuery());
+  };
 
   return (
     <Suspense fallback={<Spinner />}>
-      <UserRouting userQuery={userQuery}>{children}</UserRouting>
+      <UserRouting onFormSuccess={onFormSuccess} userQuery={userQuery}>
+        {children}
+      </UserRouting>
     </Suspense>
   );
 };
 
 type UserRoutingProps = PropsWithChildren<{
   userQuery: ReturnType<typeof getUserQuery>;
+  onFormSuccess: () => void;
 }>;
 
-const UserRouting = ({ children, userQuery }: UserRoutingProps) => {
+const UserRouting = ({
+  children,
+  userQuery,
+  onFormSuccess,
+}: UserRoutingProps) => {
   const user = use(userQuery);
 
   if (user.data) {
     return <>{children}</>;
   }
 
-  return <pre>{JSON.stringify(user, null, 2)}</pre>;
+  return <UnauthorizedRouting onFormSuccess={onFormSuccess} />;
 };
 
-const UnauthorizedRouting = () => {
-  // const
+type UnauthorizedRoutingProps = {
+  onFormSuccess: () => void;
+};
 
-  return <pre>{JSON.stringify(user, null, 2)}</pre>;
+const UnauthorizedRouting = ({ onFormSuccess }: UnauthorizedRoutingProps) => {
+  const [showSignIn, setShowSignIn] = useState(true);
+
+  const onToggleView = () => {
+    setShowSignIn((current) => !current);
+  };
+
+  if (showSignIn) {
+    return <SignInForm onSignIn={onFormSuccess} onSignUpClick={onToggleView} />;
+  }
+
+  return <SignUpForm onSignInClick={onToggleView} onSignUp={onFormSuccess} />;
 };

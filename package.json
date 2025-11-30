@@ -1,10 +1,10 @@
 {
   "dependencies": {
     "@base-ui-components/react": "1.0.0-beta.7",
-    "@orpc/client": "^1.11.3",
-    "@orpc/server": "^1.11.3",
+    "@orpc/client": "^1.12.0",
+    "@orpc/server": "^1.12.0",
     "@tailwindcss/vite": "^4.1.17",
-    "better-auth": "^1.4.3",
+    "better-auth": "^1.4.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "decode-formdata": "^0.9.0",
