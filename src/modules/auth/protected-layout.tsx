@@ -32,3 +32,9 @@ const UserRouting = ({ children, userQuery }: UserRoutingProps) => {
 
   return <pre>{JSON.stringify(user, null, 2)}</pre>;
 };
+
+const UnauthorizedRouting = () => {
+  // const
+
+  return <pre>{JSON.stringify(user, null, 2)}</pre>;
+};
