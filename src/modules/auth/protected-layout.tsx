@@ -5,8 +5,8 @@ import { rpcSuccessResult } from "@/integrations/orpc/rpc";
 import { type PropsWithChildren, Suspense, use, useState } from "react";
 
 import { SignInForm } from "./sign-in-form";
-import { SignOutButton } from "./sign-out-button";
 import { SignUpForm } from "./sign-up-form";
+import { UserContextProvider } from "./user-context";
 
 const getUserQuery = async () => {
   const user = await orpc.auth.getUser();
@@ -16,14 +16,13 @@ const getUserQuery = async () => {
 export const ProtectedLayout = ({ children }: PropsWithChildren) => {
   const [userQuery, setUserQuery] = useState(() => getUserQuery());
 
-  const onFormSuccess = () => {
+  const onInvalidate = () => {
     setUserQuery(getUserQuery());
   };
 
   return (
     <Suspense fallback={<Spinner />}>
-      <UserRouting onFormSuccess={onFormSuccess} userQuery={userQuery}>
-        <SignOutButton onSignOut={onFormSuccess} />
+      <UserRouting onInvalidate={onInvalidate} userQuery={userQuery}>
         {children}
       </UserRouting>
     </Suspense>
@@ -32,28 +31,24 @@ export const ProtectedLayout = ({ children }: PropsWithChildren) => {
 
 type UserRoutingProps = PropsWithChildren<{
   userQuery: ReturnType<typeof getUserQuery>;
-  onFormSuccess: () => void;
+  onInvalidate: () => void;
 }>;
 
 const UserRouting = ({
   children,
   userQuery,
-  onFormSuccess,
+  onInvalidate,
 }: UserRoutingProps) => {
   const user = use(userQuery);
 
-  if (user.data) {
-    return <>{children}</>;
-  }
-
-  return <UnauthorizedRouting onFormSuccess={onFormSuccess} />;
+  return (
+    <UserContextProvider onInvalidate={onInvalidate} user={user.data}>
+      {user.data ? children : <UnauthorizedRouting />}
+    </UserContextProvider>
+  );
 };
 
-type UnauthorizedRoutingProps = {
-  onFormSuccess: () => void;
-};
-
-const UnauthorizedRouting = ({ onFormSuccess }: UnauthorizedRoutingProps) => {
+const UnauthorizedRouting = () => {
   const [showSignIn, setShowSignIn] = useState(true);
 
   const onToggleView = () => {
@@ -61,8 +56,8 @@ const UnauthorizedRouting = ({ onFormSuccess }: UnauthorizedRoutingProps) => {
   };
 
   if (showSignIn) {
-    return <SignInForm onSignIn={onFormSuccess} onSignUpClick={onToggleView} />;
+    return <SignInForm onSignUpClick={onToggleView} />;
   }
 
-  return <SignUpForm onSignInClick={onToggleView} onSignUp={onFormSuccess} />;
+  return <SignUpForm onSignInClick={onToggleView} />;
 };

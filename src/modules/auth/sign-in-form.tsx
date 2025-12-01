@@ -11,13 +11,15 @@ import * as v from "valibot";
 import { AuthFields } from "./auth-fields";
 import type { APIErrorBody } from "./services/router";
 import { signInSchema } from "./services/validation";
+import { useUserContext } from "./user-context";
 
 type SignInFormProps = {
   onSignUpClick: () => void;
-  onSignIn: () => void;
 };
 
-export const SignInForm = ({ onSignUpClick, onSignIn }: SignInFormProps) => {
+export const SignInForm = ({ onSignUpClick }: SignInFormProps) => {
+  const userContext = useUserContext();
+
   const [isPending, startTransition] = useTransition();
 
   const [result, setResult] = useState<APIErrorBody>();
@@ -31,7 +33,7 @@ export const SignInForm = ({ onSignUpClick, onSignIn }: SignInFormProps) => {
       const result = await signInAction(formData);
       setResult(result ?? undefined);
       if (!result) {
-        onSignIn();
+        userContext.invalidate();
       }
     });
   };

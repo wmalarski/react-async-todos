@@ -5,16 +5,16 @@ import { orpc } from "@/integrations/orpc/client";
 import { LogOutIcon } from "lucide-react";
 import { useFormStatus } from "react-dom";
 
-type SignOutButtonProps = {
-  onSignOut: () => void;
-};
+import { useUserContext } from "./user-context";
 
-export const SignOutButton = ({ onSignOut }: SignOutButtonProps) => {
+export const SignOutButton = () => {
   const { pending } = useFormStatus();
+
+  const userContext = useUserContext();
 
   const signOutAction = async () => {
     await orpc.auth.signOut();
-    onSignOut();
+    userContext.invalidate();
   };
 
   return (
