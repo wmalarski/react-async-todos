@@ -17,7 +17,6 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { type OrpcOutputs, orpc } from "@/integrations/orpc/client";
 import { RpcFormError } from "@/integrations/orpc/components/rpc-form-error";
@@ -33,7 +32,7 @@ import { Suspense, use, useId, useState } from "react";
 import { useFormStatus } from "react-dom";
 import * as v from "valibot";
 
-import { insertTagSchema } from "./services/validation";
+import { insertTagSchema, updateTagSchema } from "./services/validation";
 
 export const TagsList = () => {
   const [tagsQuery, setTagsQuery] = useState(() => selectTagsQuery());
@@ -68,7 +67,7 @@ const TagsListContent = ({ tagsQuery, onInvalidate }: TagsListContentProps) => {
     <ul className="flex gap-1">
       {tags.map((tag) => (
         <li key={tag.id}>
-          <TagDialog tag={tag} />
+          <TagDialog onInvalidate={onInvalidate} tag={tag} />
         </li>
       ))}
       <li>
@@ -80,45 +79,113 @@ const TagsListContent = ({ tagsQuery, onInvalidate }: TagsListContentProps) => {
 
 type TagDialogProps = {
   tag: TagOutput;
+  onInvalidate: () => void;
 };
 
-const TagDialog = ({ tag }: TagDialogProps) => {
-  const nameId = useId();
-  const userNameId = useId();
+const TagDialog = ({ tag, onInvalidate }: TagDialogProps) => {
+  const updateFormId = useId();
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const onSuccess = () => {
+    setIsOpen(false);
+    onInvalidate();
+  };
 
   return (
-    <Dialog>
-      <form>
-        <DialogTrigger render={<Button variant="outline" />}>
-          {tag.name}
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid gap-3">
-              <Label htmlFor={nameId}>Name</Label>
-              <Input defaultValue="Pedro Duarte" id={nameId} name="name" />
-            </div>
-            <div className="grid gap-3">
-              <Label htmlFor={userNameId}>Username</Label>
-              <Input defaultValue="@peduarte" id={userNameId} name="username" />
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>
-              Cancel
-            </DialogClose>
-            <Button type="submit">Save changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </form>
+    <Dialog onOpenChange={setIsOpen} open={isOpen}>
+      <DialogTrigger render={<Button variant="outline" />}>
+        {tag.name}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit tag</DialogTitle>
+          <DialogDescription>
+            Make changes to tag here. Click save when you&apos;re done.
+          </DialogDescription>
+        </DialogHeader>
+        <UpdateTagForm formId={updateFormId} onSuccess={onSuccess} tag={tag} />
+        <DialogFooter>
+          <DialogClose render={<Button variant="outline" />}>
+            Cancel
+          </DialogClose>
+          <Button form={updateFormId} type="submit">
+            Save changes
+          </Button>
+          <DeleteTagForm onSuccess={onSuccess} tag={tag} />
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
+  );
+};
+
+type UpdateTagFormProps = {
+  formId: string;
+  tag: TagOutput;
+  onSuccess: () => void;
+};
+
+const UpdateTagForm = ({ formId, tag, onSuccess }: UpdateTagFormProps) => {
+  const [result, setResult] = useState<RpcResult>();
+
+  const updateAction = async (formData: FormData) => {
+    const parsed = await v.safeParseAsync(updateTagSchema, decode(formData));
+
+    console.log("[parsed]", parsed);
+
+    if (!parsed.success) {
+      setResult(rpcParseIssueResult(parsed.issues));
+      return;
+    }
+
+    const result = await orpc.tags.updateTag(parsed.output);
+    setResult(result);
+
+    if (result.success) {
+      onSuccess();
+    }
+  };
+
+  return (
+    <form action={updateAction} id={formId}>
+      <input name="tagId" type="hidden" value={tag.id} />
+      <TagFieldSet
+        error={result?.success ? undefined : result}
+        initialData={tag}
+      />
+    </form>
+  );
+};
+
+type DeleteTagFormProps = {
+  tag: TagOutput;
+  onSuccess: () => void;
+};
+
+const DeleteTagForm = ({ tag, onSuccess }: DeleteTagFormProps) => {
+  const deleteAction = async () => {
+    const result = await orpc.tags.deleteTag({ tagId: tag.id });
+
+    if (result.success) {
+      onSuccess();
+    }
+  };
+
+  return (
+    <form action={deleteAction}>
+      <DeleteTagFormContent />
+    </form>
+  );
+};
+
+const DeleteTagFormContent = () => {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
+      Delete tag
+    </Button>
   );
 };
 
@@ -172,8 +239,6 @@ type InsertTagDialogContentProps = {
 };
 
 const InsertTagDialogContent = ({ error }: InsertTagDialogContentProps) => {
-  const nameId = useId();
-
   const { pending } = useFormStatus();
 
   return (
@@ -184,25 +249,7 @@ const InsertTagDialogContent = ({ error }: InsertTagDialogContentProps) => {
           Create new tag here. Click save when you&apos;re done.
         </DialogDescription>
       </DialogHeader>
-
-      <FieldSet>
-        <RpcFormError result={error} />
-
-        <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor={nameId}>Name</FieldLabel>
-            <Input
-              aria-invalid={!!error?.errors?.name}
-              disabled={pending}
-              id={nameId}
-              name="name"
-              required
-            />
-            <FieldError errors={[{ message: error?.errors?.name }]} />
-          </Field>
-        </FieldGroup>
-      </FieldSet>
-
+      <TagFieldSet error={error} />
       <DialogFooter>
         <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
         <Button disabled={pending} type="submit">
@@ -211,5 +258,37 @@ const InsertTagDialogContent = ({ error }: InsertTagDialogContentProps) => {
         </Button>
       </DialogFooter>
     </>
+  );
+};
+
+type TagFieldSetProps = {
+  error?: RpcFailure;
+  initialData?: Partial<TagOutput>;
+};
+
+const TagFieldSet = ({ error, initialData }: TagFieldSetProps) => {
+  const nameId = useId();
+
+  const { pending } = useFormStatus();
+
+  return (
+    <FieldSet>
+      <RpcFormError result={error} />
+
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor={nameId}>Name</FieldLabel>
+          <Input
+            aria-invalid={!!error?.errors?.name}
+            defaultValue={initialData?.name}
+            disabled={pending}
+            id={nameId}
+            name="name"
+            required
+          />
+          <FieldError errors={[{ message: error?.errors?.name }]} />
+        </Field>
+      </FieldGroup>
+    </FieldSet>
   );
 };
