@@ -5,7 +5,8 @@ import { orpc } from "@/integrations/orpc/client";
 import { rpcParseIssueResult } from "@/integrations/orpc/rpc";
 
 import { decode } from "decode-formdata";
-import { type ComponentProps, useState, useTransition } from "react";
+import { useState } from "react";
+import { useFormStatus } from "react-dom";
 import * as v from "valibot";
 
 import { AuthFields } from "./auth-fields";
@@ -20,22 +21,16 @@ type SignInFormProps = {
 export const SignInForm = ({ onSignUpClick }: SignInFormProps) => {
   const userContext = useUserContext();
 
-  const [isPending, startTransition] = useTransition();
-
   const [result, setResult] = useState<APIErrorBody>();
 
-  const onSubmit: ComponentProps<"form">["onSubmit"] = (event) => {
-    event.preventDefault();
+  const action = async (formData: FormData) => {
+    const result = await signInAction(formData);
 
-    const formData = new FormData(event.currentTarget);
+    setResult(result ?? undefined);
 
-    startTransition(async () => {
-      const result = await signInAction(formData);
-      setResult(result ?? undefined);
-      if (!result) {
-        userContext.invalidate();
-      }
-    });
+    if (!result) {
+      userContext.invalidate();
+    }
   };
 
   return (
@@ -44,18 +39,32 @@ export const SignInForm = ({ onSignUpClick }: SignInFormProps) => {
         <CardTitle>Sign In</CardTitle>
       </CardHeader>
       <CardContent>
-        <form method="post" onSubmit={onSubmit}>
-          <AuthFields pending={isPending} result={result} />
-          <Button disabled={isPending} type="submit">
-            {isPending ? <Spinner /> : null}
-            Sign In
-          </Button>
+        <form action={action}>
+          <FormContent result={result} />
           <Button onClick={onSignUpClick} type="button" variant="link">
             Sign Up
           </Button>
         </form>
       </CardContent>
     </Card>
+  );
+};
+
+type FormContentProps = {
+  result?: APIErrorBody;
+};
+
+const FormContent = ({ result }: FormContentProps) => {
+  const { pending } = useFormStatus();
+
+  return (
+    <>
+      <AuthFields pending={pending} result={result} />
+      <Button disabled={pending} type="submit">
+        {pending ? <Spinner /> : null}
+        Sign In
+      </Button>
+    </>
   );
 };
 

@@ -8,8 +8,6 @@ import { useFormStatus } from "react-dom";
 import { useUserContext } from "./user-context";
 
 export const SignOutButton = () => {
-  const { pending } = useFormStatus();
-
   const userContext = useUserContext();
 
   const signOutAction = async () => {
@@ -19,10 +17,18 @@ export const SignOutButton = () => {
 
   return (
     <form action={signOutAction}>
-      <Button disabled={pending} type="submit" variant="outline">
-        {pending ? <Spinner /> : <LogOutIcon />}
-        Sign Out
-      </Button>
+      <FormButton />
     </form>
+  );
+};
+
+const FormButton = () => {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button disabled={pending} type="submit" variant="outline">
+      {pending ? <Spinner /> : <LogOutIcon />}
+      Sign Out
+    </Button>
   );
 };

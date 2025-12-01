@@ -5,7 +5,8 @@ import { orpc } from "@/integrations/orpc/client";
 import { rpcParseIssueResult } from "@/integrations/orpc/rpc";
 
 import { decode } from "decode-formdata";
-import { type ComponentProps, useState, useTransition } from "react";
+import { useState } from "react";
+import { useFormStatus } from "react-dom";
 import * as v from "valibot";
 
 import { AuthFields } from "./auth-fields";
@@ -20,20 +21,16 @@ type SignUpFormProps = {
 export const SignUpForm = ({ onSignInClick }: SignUpFormProps) => {
   const userContext = useUserContext();
 
-  const [isPending, startTransition] = useTransition();
-
   const [result, setResult] = useState<APIErrorBody>();
 
-  const onSubmit: ComponentProps<"form">["onSubmit"] = (event) => {
-    event.preventDefault();
+  const action = async (formData: FormData) => {
+    const result = await signUpAction(formData);
 
-    startTransition(async () => {
-      const result = await signUpAction(new FormData(event.currentTarget));
-      setResult(result ?? undefined);
-      if (!result) {
-        userContext.invalidate();
-      }
-    });
+    setResult(result ?? undefined);
+
+    if (!result) {
+      userContext.invalidate();
+    }
   };
 
   return (
@@ -42,18 +39,32 @@ export const SignUpForm = ({ onSignInClick }: SignUpFormProps) => {
         <CardTitle>Sign Up</CardTitle>
       </CardHeader>
       <CardContent>
-        <form method="post" onSubmit={onSubmit}>
-          <AuthFields pending={isPending} result={result} />
-          <Button disabled={isPending} type="submit">
-            {isPending ? <Spinner /> : null}
-            Sign Up
-          </Button>
+        <form action={action}>
+          <FormContent result={result} />
           <Button onClick={onSignInClick} type="button" variant="link">
             Sign In
           </Button>
         </form>
       </CardContent>
     </Card>
+  );
+};
+
+type FormContentProps = {
+  result?: APIErrorBody;
+};
+
+const FormContent = ({ result }: FormContentProps) => {
+  const { pending } = useFormStatus();
+
+  return (
+    <>
+      <AuthFields pending={pending} result={result} />
+      <Button disabled={pending} type="submit">
+        {pending ? <Spinner /> : null}
+        Sign Up
+      </Button>
+    </>
   );
 };
 

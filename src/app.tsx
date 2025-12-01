@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 import { ProtectedLayout } from "./modules/auth/protected-layout";
+import { SignOutButton } from "./modules/auth/sign-out-button";
 
 export default function App() {
   const [count, setCount] = useState(0);
@@ -10,6 +11,7 @@ export default function App() {
 
   return (
     <ProtectedLayout>
+      <SignOutButton />
       <div>
         <Button
           aria-label="increment"
