@@ -5,6 +5,7 @@ import { rpcSuccessResult } from "@/integrations/orpc/rpc";
 import { type PropsWithChildren, Suspense, use, useState } from "react";
 
 import { SignInForm } from "./sign-in-form";
+import { SignOutButton } from "./sign-out-button";
 import { SignUpForm } from "./sign-up-form";
 
 const getUserQuery = async () => {
@@ -22,6 +23,11 @@ export const ProtectedLayout = ({ children }: PropsWithChildren) => {
   return (
     <Suspense fallback={<Spinner />}>
       <UserRouting onFormSuccess={onFormSuccess} userQuery={userQuery}>
+        <SignOutButton
+          onSignOut={() => {
+            console.log("[onSignOut]");
+          }}
+        />
         {children}
       </UserRouting>
     </Suspense>

@@ -23,6 +23,8 @@ export const SignUpForm = ({ onSignInClick, onSignUp }: SignUpFormProps) => {
   const [result, setResult] = useState<APIErrorBody>();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = (event) => {
+    event.preventDefault();
+
     startTransition(async () => {
       const result = await signUpAction(new FormData(event.currentTarget));
       setResult(result ?? undefined);
@@ -31,6 +33,7 @@ export const SignUpForm = ({ onSignInClick, onSignUp }: SignUpFormProps) => {
       }
     });
   };
+
   return (
     <Card>
       <CardHeader>

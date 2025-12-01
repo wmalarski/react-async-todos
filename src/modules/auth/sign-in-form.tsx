@@ -22,9 +22,21 @@ export const SignInForm = ({ onSignUpClick, onSignIn }: SignInFormProps) => {
 
   const [result, setResult] = useState<APIErrorBody>();
 
+  // const action = async (formData: FormData) => {
+  //     const result = await signInAction(formData);
+  //     setResult(result ?? undefined);
+  //     if (!result) {
+  //       onSignIn();
+  //     }
+  // };
+
   const onSubmit: ComponentProps<"form">["onSubmit"] = (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+
     startTransition(async () => {
-      const result = await signInAction(new FormData(event.currentTarget));
+      const result = await signInAction(formData);
       setResult(result ?? undefined);
       if (!result) {
         onSignIn();
