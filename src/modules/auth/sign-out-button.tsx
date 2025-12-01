@@ -18,8 +18,8 @@ export const SignOutButton = ({ onSignOut }: SignOutButtonProps) => {
   };
 
   return (
-    <form action={signOutAction} method="post">
-      <Button disabled={pending} variant="outline">
+    <form action={signOutAction}>
+      <Button disabled={pending} type="submit" variant="outline">
         {pending ? <Spinner /> : <LogOutIcon />}
         Sign Out
       </Button>

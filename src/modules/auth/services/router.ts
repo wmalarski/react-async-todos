@@ -45,8 +45,6 @@ const signUp = osBase
 const signIn = osBase
   .input(signInSchema)
   .handler(async ({ context, input }) => {
-    console.log("[signIn]", input);
-
     try {
       const response = await context.auth.api.signInEmail({
         body: input,
@@ -54,15 +52,9 @@ const signIn = osBase
       });
 
       setResHeaders(context, response.headers);
-
-      console.log("[signIn]", response);
     } catch (error) {
-      console.log("[signIn]", error);
-
       return handleApiError(context, error);
     }
-
-    console.log("[signIn]");
 
     return null;
   });

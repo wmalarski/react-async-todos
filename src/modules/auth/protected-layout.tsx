@@ -23,11 +23,7 @@ export const ProtectedLayout = ({ children }: PropsWithChildren) => {
   return (
     <Suspense fallback={<Spinner />}>
       <UserRouting onFormSuccess={onFormSuccess} userQuery={userQuery}>
-        <SignOutButton
-          onSignOut={() => {
-            console.log("[onSignOut]");
-          }}
-        />
+        <SignOutButton onSignOut={onFormSuccess} />
         {children}
       </UserRouting>
     </Suspense>
