@@ -1,6 +1,5 @@
-import type { router } from "@/integrations/orpc/router";
+import type { OrpcOutputs } from "@/integrations/orpc/client";
 
-import type { InferRouterOutputs } from "@orpc/server";
 import {
   createContext,
   type PropsWithChildren,
@@ -9,7 +8,7 @@ import {
   useMemo,
 } from "react";
 
-export type User = InferRouterOutputs<typeof router>["auth"]["getUser"];
+export type User = OrpcOutputs["auth"]["getUser"];
 
 type UserContextValue = {
   user: User | null;
