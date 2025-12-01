@@ -28,7 +28,14 @@ import {
 
 import { decode } from "decode-formdata";
 import { PlusIcon } from "lucide-react";
-import { Suspense, use, useId, useState } from "react";
+import {
+  type ComponentProps,
+  Suspense,
+  use,
+  useId,
+  useState,
+  useTransition,
+} from "react";
 import { useFormStatus } from "react-dom";
 import * as v from "valibot";
 
@@ -87,6 +94,31 @@ const TagDialog = ({ tag, onInvalidate }: TagDialogProps) => {
 
   const [isOpen, setIsOpen] = useState(false);
 
+  const [result, setResult] = useState<RpcResult>();
+  const [isPendingUpdate, startUpdateTransition] = useTransition();
+
+  const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+
+    startUpdateTransition(async () => {
+      const parsed = await v.safeParseAsync(updateTagSchema, decode(formData));
+
+      if (!parsed.success) {
+        setResult(rpcParseIssueResult(parsed.issues));
+        return;
+      }
+
+      const result = await orpc.tags.updateTag(parsed.output);
+      setResult(result);
+
+      if (result.success) {
+        onSuccess();
+      }
+    });
+  };
+
   const onSuccess = () => {
     setIsOpen(false);
     onInvalidate();
@@ -104,56 +136,25 @@ const TagDialog = ({ tag, onInvalidate }: TagDialogProps) => {
             Make changes to tag here. Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
-        <UpdateTagForm formId={updateFormId} onSuccess={onSuccess} tag={tag} />
+        <form id={updateFormId} onSubmit={onSubmit}>
+          <input name="tagId" type="hidden" value={tag.id} />
+          <TagFieldSet
+            error={result?.success ? undefined : result}
+            initialData={tag}
+          />
+        </form>
         <DialogFooter>
           <DialogClose render={<Button variant="outline" />}>
             Cancel
           </DialogClose>
-          <Button form={updateFormId} type="submit">
+          <Button disabled={isPendingUpdate} form={updateFormId} type="submit">
+            {isPendingUpdate ? <Spinner /> : null}
             Save changes
           </Button>
           <DeleteTagForm onSuccess={onSuccess} tag={tag} />
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
-
-type UpdateTagFormProps = {
-  formId: string;
-  tag: TagOutput;
-  onSuccess: () => void;
-};
-
-const UpdateTagForm = ({ formId, tag, onSuccess }: UpdateTagFormProps) => {
-  const [result, setResult] = useState<RpcResult>();
-
-  const updateAction = async (formData: FormData) => {
-    const parsed = await v.safeParseAsync(updateTagSchema, decode(formData));
-
-    console.log("[parsed]", parsed);
-
-    if (!parsed.success) {
-      setResult(rpcParseIssueResult(parsed.issues));
-      return;
-    }
-
-    const result = await orpc.tags.updateTag(parsed.output);
-    setResult(result);
-
-    if (result.success) {
-      onSuccess();
-    }
-  };
-
-  return (
-    <form action={updateAction} id={formId}>
-      <input name="tagId" type="hidden" value={tag.id} />
-      <TagFieldSet
-        error={result?.success ? undefined : result}
-        initialData={tag}
-      />
-    </form>
   );
 };
 
