@@ -17,6 +17,7 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { type OrpcOutputs, orpc } from "@/integrations/orpc/client";
 import { RpcFormError } from "@/integrations/orpc/components/rpc-form-error";
@@ -71,16 +72,19 @@ const TagsListContent = ({ tagsQuery, onInvalidate }: TagsListContentProps) => {
   const tags = use(tagsQuery);
 
   return (
-    <ul className="flex gap-1">
-      {tags.map((tag) => (
-        <li key={tag.id}>
-          <TagDialog onInvalidate={onInvalidate} tag={tag} />
+    <ScrollArea className="w-[calc(100vw-1rem)]">
+      <ul className="flex gap-1">
+        {tags.map((tag) => (
+          <li key={tag.id}>
+            <TagDialog onInvalidate={onInvalidate} tag={tag} />
+          </li>
+        ))}
+        <li>
+          <InsertTagDialog onSuccess={onInvalidate} />
         </li>
-      ))}
-      <li>
-        <InsertTagDialog onSuccess={onInvalidate} />
-      </li>
-    </ul>
+      </ul>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   );
 };
 

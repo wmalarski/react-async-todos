@@ -7,10 +7,12 @@ import { TagsList } from "./modules/tags/tags-list";
 export default function App() {
   return (
     <ProtectedLayout>
-      <SignOutButton />
-      <Suspense>
-        <TagsList />
-      </Suspense>
+      <main className="grid gap-1 p-2">
+        <SignOutButton />
+        <Suspense>
+          <TagsList />
+        </Suspense>
+      </main>
     </ProtectedLayout>
   );
 }
