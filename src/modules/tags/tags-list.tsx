@@ -99,7 +99,7 @@ const TagDialog = ({ tag, onInvalidate }: TagDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const [result, setResult] = useState<RpcResult>();
-  const [isPendingUpdate, startUpdateTransition] = useTransition();
+  const [isUpdatePending, startUpdateTransition] = useTransition();
 
   const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
     event.preventDefault();
@@ -145,14 +145,15 @@ const TagDialog = ({ tag, onInvalidate }: TagDialogProps) => {
           <TagFieldSet
             error={result?.success ? undefined : result}
             initialData={tag}
+            pending={isUpdatePending}
           />
         </form>
         <DialogFooter>
           <DialogClose render={<Button variant="outline" />}>
             Cancel
           </DialogClose>
-          <Button disabled={isPendingUpdate} form={updateFormId} type="submit">
-            {isPendingUpdate ? <Spinner /> : null}
+          <Button disabled={isUpdatePending} form={updateFormId} type="submit">
+            {isUpdatePending ? <Spinner /> : null}
             Save changes
           </Button>
           <DeleteTagForm onSuccess={onSuccess} tag={tag} />
@@ -254,7 +255,7 @@ const InsertTagDialogContent = ({ error }: InsertTagDialogContentProps) => {
           Create new tag here. Click save when you&apos;re done.
         </DialogDescription>
       </DialogHeader>
-      <TagFieldSet error={error} />
+      <TagFieldSet error={error} pending={pending} />
       <DialogFooter>
         <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
         <Button disabled={pending} type="submit">
@@ -269,12 +270,11 @@ const InsertTagDialogContent = ({ error }: InsertTagDialogContentProps) => {
 type TagFieldSetProps = {
   error?: RpcFailure;
   initialData?: Partial<TagOutput>;
+  pending: boolean;
 };
 
-const TagFieldSet = ({ error, initialData }: TagFieldSetProps) => {
+const TagFieldSet = ({ error, initialData, pending }: TagFieldSetProps) => {
   const nameId = useId();
-
-  const { pending } = useFormStatus();
 
   return (
     <FieldSet>
