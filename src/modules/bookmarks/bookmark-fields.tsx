@@ -12,6 +12,8 @@ import type { RpcResult } from "@/integrations/orpc/rpc";
 
 import { useFormStatus } from "react-dom";
 
+import { TagsCombobox } from "../tags/tags-combobox";
+
 type SelectBookmarksOutput = OrpcOutputs["bookmarks"]["selectBookmarks"];
 type BookmarkOutput = SelectBookmarksOutput["bookmarks"][0];
 
@@ -97,7 +99,7 @@ export const BookmarkFields = ({
 
         <TagsCombobox
           disabled={pending}
-          initialTags={initialData?.tags}
+          initialTags={initialData?.tags?.map((tag) => tag.id)}
           name="tags"
         />
       </FieldGroup>

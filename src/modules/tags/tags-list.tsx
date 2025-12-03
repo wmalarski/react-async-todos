@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
-import { type OrpcOutputs, orpc } from "@/integrations/orpc/client";
+import { orpc } from "@/integrations/orpc/client";
 import { RpcFormError } from "@/integrations/orpc/components/rpc-form-error";
 import {
   type RpcFailure,
@@ -40,6 +40,11 @@ import {
 import { useFormStatus } from "react-dom";
 import * as v from "valibot";
 
+import {
+  type SelectTagsOutput,
+  type TagOutput,
+  selectTagsQuery,
+} from "./services/actions";
 import { insertTagSchema, updateTagSchema } from "./services/validation";
 
 export const TagsList = () => {
@@ -55,13 +60,6 @@ export const TagsList = () => {
     </Suspense>
   );
 };
-
-const selectTagsQuery = async () => {
-  return orpc.tags.selectTags({ page: 0 });
-};
-
-type SelectTagsOutput = OrpcOutputs["tags"]["selectTags"];
-type TagOutput = SelectTagsOutput[0];
 
 type TagsListContentProps = {
   tagsQuery: Promise<SelectTagsOutput>;
