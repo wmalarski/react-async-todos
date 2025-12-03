@@ -20,6 +20,7 @@ type BookmarkOutput = SelectBookmarksOutput["bookmarks"][0];
 type BookmarkFieldsProps = {
   initialData?: Partial<BookmarkOutput>;
   result?: RpcResult;
+  pending: boolean;
 };
 
 export const BookmarkFields = ({

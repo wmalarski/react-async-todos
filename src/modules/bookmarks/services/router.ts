@@ -1,6 +1,7 @@
 import type { Db } from "@/integrations/drizzle/init";
 import { bookmark, bookmarkTag } from "@/integrations/drizzle/schema";
 import { osProtectedBase } from "@/integrations/orpc/base";
+import { rpcErrorResult, rpcSuccessResult } from "@/integrations/orpc/rpc";
 
 import { ORPCError } from "@orpc/server";
 import { and, count, eq, inArray, like, or, sql } from "drizzle-orm";
@@ -192,7 +193,7 @@ const insertBookmark = osProtectedBase
     });
 
     if (response.error) {
-      throw new ORPCError("BAD_REQUEST", response.error);
+      return rpcErrorResult(response.error);
     }
 
     const tagsResponse = await context.db.insert(bookmarkTag).values(
@@ -205,10 +206,10 @@ const insertBookmark = osProtectedBase
     );
 
     if (tagsResponse.error) {
-      throw new ORPCError("BAD_REQUEST", response.error);
+      return rpcErrorResult(tagsResponse.error);
     }
 
-    return { success: tagsResponse.success };
+    return rpcSuccessResult({ id: bookmarkId });
   });
 
 const deleteBookmark = osProtectedBase

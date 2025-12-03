@@ -10,7 +10,11 @@ export default function App() {
     <ProtectedLayout>
       <main className="grid gap-1 p-2">
         <header className="flex gap-1">
-          <InsertBookmarkDialog />
+          <InsertBookmarkDialog
+            successAction={() => {
+              console.log("[successAction]");
+            }}
+          />
           <SignOutButton />
         </header>
         <Suspense>

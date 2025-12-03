@@ -99,7 +99,7 @@ const TagsComboboxInternal = ({
       items={tags}
       multiple
     >
-      <div className="flex w-full max-w-xs flex-col gap-3">
+      <div className="flex w-full flex-col gap-3">
         <Label htmlFor={id}>Tags</Label>
         <ComboboxChips ref={containerRef}>
           <ComboboxValue>
@@ -119,6 +119,7 @@ const TagsComboboxInternal = ({
                 <ComboboxInput
                   className="h-6 flex-1 border-0 bg-transparent pl-2 text-base shadow-none outline-none focus-visible:ring-0"
                   id={id}
+                  placeholder="Tag"
                 />
               </Fragment>
             )}
