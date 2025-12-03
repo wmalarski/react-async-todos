@@ -5,7 +5,7 @@ import { orpc } from "@/integrations/orpc/client";
 import { rpcParseIssueResult } from "@/integrations/orpc/rpc";
 
 import { decode } from "decode-formdata";
-import { useState } from "react";
+import { startTransition, useState } from "react";
 import { useFormStatus } from "react-dom";
 import * as v from "valibot";
 
@@ -26,11 +26,13 @@ export const SignInForm = ({ onSignUpClick }: SignInFormProps) => {
   const action = async (formData: FormData) => {
     const result = await signInAction(formData);
 
-    setResult(result ?? undefined);
+    startTransition(() => {
+      setResult(result ?? undefined);
 
-    if (!result) {
-      userContext.invalidate();
-    }
+      if (!result) {
+        userContext.invalidate();
+      }
+    });
   };
 
   return (

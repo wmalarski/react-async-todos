@@ -3,6 +3,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { orpc } from "@/integrations/orpc/client";
 
 import { LogOutIcon } from "lucide-react";
+import { startTransition } from "react";
 import { useFormStatus } from "react-dom";
 
 import { useUserContext } from "./user-context";
@@ -12,7 +13,10 @@ export const SignOutButton = () => {
 
   const signOutAction = async () => {
     await orpc.auth.signOut();
-    userContext.invalidate();
+
+    startTransition(() => {
+      userContext.invalidate();
+    });
   };
 
   return (
