@@ -10,11 +10,11 @@ import {
 } from "@/components/ui/dialog";
 
 import { PlusIcon } from "lucide-react";
-import { useId, useState } from "react";
+import { type ComponentProps, useId, useState } from "react";
 
 import { BookmarkFields } from "./bookmark-fields";
 
-export const InsertBookmarkControlledDialog = () => {
+export const InsertBookmarkDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const formId = useId();
@@ -28,6 +28,15 @@ export const InsertBookmarkControlledDialog = () => {
   //   },
   // });
 
+  const onSubmit: ComponentProps<"form">["onSubmit"] = (event) => {
+    event.preventDefault();
+
+    console.log(
+      "[onSubmit]",
+      Object.fromEntries(new FormData(event.currentTarget).entries()),
+    );
+  };
+
   return (
     <Dialog onOpenChange={setIsOpen} open={isOpen}>
       <DialogTrigger
@@ -38,10 +47,12 @@ export const InsertBookmarkControlledDialog = () => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{"bookmarks.dialogs.create"}</DialogTitle>
-          <DialogDescription>{"bookmarks.dialogs.create"}</DialogDescription>
+          <DialogTitle>Create new bookmark</DialogTitle>
+          <DialogDescription>
+            Create new bookmark here. Click save when you&apos;re done.
+          </DialogDescription>
         </DialogHeader>
-        <form id={formId}>
+        <form id={formId} onSubmit={onSubmit}>
           <BookmarkFields
           // pending={submission.pending}
           // result={submission.result}
@@ -54,7 +65,7 @@ export const InsertBookmarkControlledDialog = () => {
             // isLoading={submission.pending}
             type="submit"
           >
-            {"common.save"}
+            Save changes
           </Button>
         </DialogFooter>
       </DialogContent>

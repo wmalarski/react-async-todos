@@ -1,6 +1,8 @@
 import {
   Combobox,
-  ComboboxClear,
+  ComboboxChip,
+  ComboboxChipRemove,
+  ComboboxChips,
   ComboboxEmpty,
   ComboboxInput,
   ComboboxItem,
@@ -8,18 +10,29 @@ import {
   ComboboxList,
   ComboboxPopup,
   ComboboxPositioner,
-  ComboboxTrigger,
+  ComboboxValue,
 } from "@/components/ui/combobox";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 
-import { ChevronDownIcon } from "lucide-react";
-import { Suspense, use, useId, useState } from "react";
+import {
+  Fragment,
+  Suspense,
+  use,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-import { type SelectTagsOutput, selectTagsQuery } from "./services/actions";
+import {
+  type SelectTagsOutput,
+  selectTagsQuery,
+  type TagOutput,
+} from "./services/actions";
 
 type TagsComboboxProps = {
-  initialTags?: string[];
+  initialTagIds?: string[];
   name: string;
   disabled?: boolean;
 };
@@ -27,15 +40,15 @@ type TagsComboboxProps = {
 export const TagsCombobox = ({
   name,
   disabled,
-  initialTags,
+  initialTagIds,
 }: TagsComboboxProps) => {
   const [tagsQuery] = useState(() => selectTagsQuery());
 
   return (
     <Suspense fallback={<Spinner />}>
-      <TagsComboboxInternal2
+      <TagsComboboxInternal
         disabled={disabled}
-        initialTags={initialTags}
+        initialTagIds={initialTagIds}
         name={name}
         tagsQuery={tagsQuery}
       />
@@ -43,230 +56,92 @@ export const TagsCombobox = ({
   );
 };
 
-type TagsComboboxInternal2 = {
+type TagsComboboxInternalProps = {
   tagsQuery: Promise<SelectTagsOutput>;
-  initialTags?: string[];
+  initialTagIds?: string[];
   name: string;
   disabled?: boolean;
 };
 
-const TagsComboboxInternal2 = ({ tagsQuery }: TagsComboboxInternal2) => {
+const TagsComboboxInternal = ({
+  tagsQuery,
+  name,
+  disabled,
+  initialTagIds,
+}: TagsComboboxInternalProps) => {
   const tags = use(tagsQuery);
 
   const id = useId();
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  return (
-    <div className="w-full max-w-3xs">
-      <Combobox items={fruits}>
-        <div className="relative flex flex-col gap-2">
-          <Label htmlFor={id}>Choose a fruit</Label>
-          <ComboboxInput id={id} placeholder="e.g. Apple" />
-          <div className="absolute right-2 bottom-0 flex h-9 items-center justify-center text-muted-foreground">
-            <ComboboxClear />
-            <ComboboxTrigger
-              aria-label="Open popup"
-              className="h-9 w-6 border-none bg-transparent text-muted-foreground shadow-none hover:bg-transparent"
-            >
-              <ChevronDownIcon className="size-4" />
-            </ComboboxTrigger>
-          </div>
-        </div>
-        <ComboboxPositioner sideOffset={6}>
-          <ComboboxPopup>
-            <ComboboxEmpty>No fruits found.</ComboboxEmpty>
-            <ComboboxList>
-              {(item: string) => (
-                <ComboboxItem key={item} value={item}>
-                  <ComboboxItemIndicator />
-                  <div className="col-start-2">{item}</div>
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </ComboboxPopup>
-        </ComboboxPositioner>
-      </Combobox>
-    </div>
-  );
-};
-const fruits = [
-  "Apple",
-  "Banana",
-  "Orange",
-  "Pineapple",
-  "Grape",
-  "Mango",
-  "Strawberry",
-  "Blueberry",
-  "Raspberry",
-  "Blackberry",
-  "Cherry",
-  "Peach",
-  "Pear",
-  "Plum",
-  "Kiwi",
-  "Watermelon",
-  "Cantaloupe",
-  "Honeydew",
-  "Papaya",
-  "Guava",
-  "Lychee",
-  "Pomegranate",
-  "Apricot",
-  "Grapefruit",
-  "Passionfruit",
-];
+  const defaultValues = useMemo(() => {
+    if (!initialTagIds || initialTagIds?.length === 0) {
+      return [];
+    }
 
-/*
-type TagsComboboxInternalProps = {
-  tags: TagModel[];
-  initialTags?: string[];
-  name: string;
-  disabled?: boolean;
-};
+    const map = new Map(tags.map((tag) => [tag.id, tag]));
+    const defaultValues: TagOutput[] = [];
 
-const TagsComboboxInternal: Component<TagsComboboxInternalProps> = (props) => {
-  const { t } = useI18n();
-
-  const values = createMemo(() => {
-    const [get, set] = createSignal(initialTags);
-    return { get, set };
-  });
-
-  const items = createMemo(() => {
-    const [get, set] = createSignal(tags);
-    return { get, set };
-  });
-
-  const collection = createMemo(() =>
-    createListCollection({
-      items: tags,
-      itemToString: (item) => item.name,
-      itemToValue: (item) => item.id,
-    }),
-  );
-
-  const [input, setInput] = createSignal("");
-
-  const onInputChange = (event: Combobox.InputValueChangeDetails) => {
-    setInput(event.inputValue);
-
-    const input = event.inputValue.toLowerCase();
-    const filtered = tags.filter((item) =>
-      item.name.toLowerCase().includes(input),
-    );
-    items().set(filtered.length > 0 ? filtered : tags);
-  };
-
-  const onValueChange: ComboboxRootProps<TagModel>["onValueChange"] = (
-    event,
-  ) => {
-    values().set(event.value);
-  };
-
-  const tagsMap = createMemo(() => {
-    return new Map(tags.map((tag) => [tag.id, tag]));
-  });
-
-  const selectedTags = createMemo(() => {
-    const ids = values().get() ?? [];
-    const map = tagsMap();
-
-    const selectedTags: TagModel[] = [];
-    ids.forEach((id) => {
-      const tag = map.get(id);
+    initialTagIds.forEach((tagId) => {
+      const tag = map.get(tagId);
       if (tag) {
-        selectedTags.push(tag);
+        defaultValues.push(tag);
       }
     });
 
-    return selectedTags;
-  });
-
-  const onTagRemoveFactory = (tag: TagModel) => () => {
-    values().set((previous) => previous?.filter((entry) => entry !== tag.id));
-  };
+    return defaultValues;
+  }, [initialTagIds, tags.map]);
 
   return (
-    <>
-      <For each={values().get()}>
-        {(value, index) => (
-          <input name={`${name}[${index()}]`} type="hidden" value={value} />
-        )}
-      </For>
-      <Combobox.Root
-        class={css({
-          display: "flex",
-          flexDir: "column",
-          gap: "1.5",
-          w: "full",
-        })}
-        collection={collection()}
-        disabled={disabled}
-        inputValue={input()}
-        multiple
-        onInputValueChange={onInputChange}
-        onValueChange={onValueChange}
-        value={values().get()}
-      >
-        <Combobox.Label>{t("tags.combobox.label")}</Combobox.Label>
-        <Show when={selectedTags().length > 0}>
-          <Flex gap="1.5">
-            <For each={selectedTags()}>
-              {(value) => (
-                <Badge variant="outline">
-                  {value.name}
-                  <IconButton
-                    onClick={onTagRemoveFactory(value)}
-                    size="xs"
-                    type="button"
-                    variant="link"
-                  >
-                    <XIcon />
-                  </IconButton>
-                </Badge>
-              )}
-            </For>
-          </Flex>
-        </Show>
-        <Combobox.Control>
-          <Combobox.Input
-            asChild={(inputProps) => <Input {...inputProps()} />}
-            placeholder={t("tags.combobox.placeholder")}
-          />
-          <Combobox.Trigger
-            asChild={(triggerProps) => (
-              <IconButton
-                aria-label="open"
-                size="xs"
-                variant="link"
-                {...triggerProps()}
-              >
-                <ChevronsUpDown />
-              </IconButton>
+    <Combobox
+      defaultValue={defaultValues}
+      disabled={disabled}
+      items={tags}
+      multiple
+    >
+      <div className="flex w-full max-w-xs flex-col gap-3">
+        <Label htmlFor={id}>Tags</Label>
+        <ComboboxChips ref={containerRef}>
+          <ComboboxValue>
+            {(value: TagOutput[]) => (
+              <Fragment>
+                {value.map((tag, index) => (
+                  <ComboboxChip aria-label={tag.name} key={tag.id}>
+                    <input
+                      name={`${name}[${index}]`}
+                      type="hidden"
+                      value={tag.id}
+                    />
+                    {tag.name}
+                    <ComboboxChipRemove />
+                  </ComboboxChip>
+                ))}
+                <ComboboxInput
+                  className="h-6 flex-1 border-0 bg-transparent pl-2 text-base shadow-none outline-none focus-visible:ring-0"
+                  id={id}
+                />
+              </Fragment>
             )}
-          />
-        </Combobox.Control>
-        <Combobox.Positioner>
-          <Combobox.Content>
-            <Combobox.ItemGroup>
-              <Combobox.ItemGroupLabel>
-                {t("tags.combobox.label")}
-              </Combobox.ItemGroupLabel>
-              <For each={items().get()}>
-                {(item) => (
-                  <Combobox.Item item={item}>
-                    <Combobox.ItemText>{item.name}</Combobox.ItemText>
-                    <Combobox.ItemIndicator>
-                      <Check />
-                    </Combobox.ItemIndicator>
-                  </Combobox.Item>
-                )}
-              </For>
-            </Combobox.ItemGroup>
-          </Combobox.Content>
-        </Combobox.Positioner>
-      </Combobox.Root>
-    </>
+          </ComboboxValue>
+        </ComboboxChips>
+      </div>
+      <ComboboxPositioner
+        anchor={containerRef}
+        className="z-50 outline-none"
+        sideOffset={6}
+      >
+        <ComboboxPopup>
+          <ComboboxEmpty>No tags found.</ComboboxEmpty>
+          <ComboboxList>
+            {(tag: TagOutput) => (
+              <ComboboxItem key={tag.id} value={tag}>
+                <ComboboxItemIndicator />
+                <div className="col-start-2">{tag.name}</div>
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+        </ComboboxPopup>
+      </ComboboxPositioner>
+    </Combobox>
   );
 };
-*/

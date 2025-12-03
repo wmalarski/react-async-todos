@@ -38,7 +38,7 @@ export const BookmarkFields = ({
         <RpcFormError result={rpcFailure} />
 
         <Field>
-          <FieldLabel>title</FieldLabel>
+          <FieldLabel>Title</FieldLabel>
           <Input
             aria-invalid={!!rpcFailure?.errors?.title}
             defaultValue={initialData?.title}
@@ -53,13 +53,13 @@ export const BookmarkFields = ({
         </Field>
 
         <Field>
-          <FieldLabel>text</FieldLabel>
+          <FieldLabel>Text</FieldLabel>
           <Input
             aria-invalid={!!rpcFailure?.errors?.text}
             defaultValue={initialData?.text ?? ""}
             disabled={pending}
             name="text"
-            placeholder="text"
+            placeholder="Text"
             required
             type="text"
             width="full"
@@ -68,13 +68,13 @@ export const BookmarkFields = ({
         </Field>
 
         <Field>
-          <FieldLabel>url</FieldLabel>
+          <FieldLabel>Url</FieldLabel>
           <Input
             aria-invalid={!!rpcFailure?.errors?.url}
             defaultValue={initialData?.url ?? ""}
             disabled={pending}
             name="url"
-            placeholder="url"
+            placeholder="Url"
             required
             type="url"
             width="full"
@@ -83,13 +83,13 @@ export const BookmarkFields = ({
         </Field>
 
         <Field>
-          <FieldLabel>preview</FieldLabel>
+          <FieldLabel>Preview</FieldLabel>
           <Input
             aria-invalid={!!rpcFailure?.errors?.preview}
             defaultValue={initialData?.preview ?? ""}
             disabled={pending}
             name="preview"
-            placeholder="preview"
+            placeholder="Preview"
             required
             type="text"
             width="full"
@@ -99,7 +99,7 @@ export const BookmarkFields = ({
 
         <TagsCombobox
           disabled={pending}
-          initialTags={initialData?.tags?.map((tag) => tag.id)}
+          initialTagIds={initialData?.tags?.map((tag) => tag.id)}
           name="tags"
         />
       </FieldGroup>
