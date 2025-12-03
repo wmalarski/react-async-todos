@@ -32,6 +32,7 @@ import { PlusIcon } from "lucide-react";
 import {
   type ComponentProps,
   Suspense,
+  startTransition,
   use,
   useId,
   useState,
@@ -105,7 +106,7 @@ const TagDialog = ({ tag, onInvalidate }: TagDialogProps) => {
     const formData = new FormData(event.currentTarget);
 
     startUpdateTransition(async () => {
-      const parsed = await v.safeParseAsync(updateTagSchema, decode(formData));
+      const parsed = v.safeParse(updateTagSchema, decode(formData));
 
       if (!parsed.success) {
         setResult(rpcParseIssueResult(parsed.issues));
@@ -113,11 +114,14 @@ const TagDialog = ({ tag, onInvalidate }: TagDialogProps) => {
       }
 
       const result = await orpc.tags.updateTag(parsed.output);
-      setResult(result);
 
-      if (result.success) {
-        onSuccess();
-      }
+      startUpdateTransition(() => {
+        setResult(result);
+
+        if (result.success) {
+          onSuccess();
+        }
+      });
     });
   };
 
@@ -170,9 +174,11 @@ const DeleteTagForm = ({ tag, onSuccess }: DeleteTagFormProps) => {
   const deleteAction = async () => {
     const result = await orpc.tags.deleteTag({ tagId: tag.id });
 
-    if (result.success) {
-      onSuccess();
-    }
+    startTransition(() => {
+      if (result.success) {
+        onSuccess();
+      }
+    });
   };
 
   return (
@@ -203,7 +209,7 @@ const InsertTagDialog = ({ onSuccess }: InsertTagDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const insertTagAction = async (form: FormData) => {
-    const parsed = await v.safeParseAsync(insertTagSchema, decode(form));
+    const parsed = v.safeParse(insertTagSchema, decode(form));
 
     if (!parsed.success) {
       setResult(rpcParseIssueResult(parsed.issues));
@@ -211,12 +217,15 @@ const InsertTagDialog = ({ onSuccess }: InsertTagDialogProps) => {
     }
 
     const result = await orpc.tags.insertTag(parsed.output);
-    setResult(result);
 
-    if (result.success) {
-      setIsOpen(false);
-      onSuccess();
-    }
+    startTransition(() => {
+      setResult(result);
+
+      if (result.success) {
+        setIsOpen(false);
+        onSuccess();
+      }
+    });
   };
 
   return (
