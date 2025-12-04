@@ -15,16 +15,17 @@ import { startTransition, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { BookmarkFields } from "./bookmark-fields";
+import { useBookmarksContext } from "./bookmarks-provider";
 import { insertBookmarkMutation } from "./services/actions";
 
-type InsertBookmarkDialogProps = {
-  successAction: () => void;
-};
-
-export const InsertBookmarkDialog = ({
-  successAction,
-}: InsertBookmarkDialogProps) => {
+export const InsertBookmarkDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const bookmarksContext = useBookmarksContext();
+
+  const successAction = () => {
+    bookmarksContext.invalidate();
+  };
 
   return (
     <Dialog onOpenChange={setIsOpen} open={isOpen}>

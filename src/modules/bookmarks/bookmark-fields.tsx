@@ -6,16 +6,13 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import type { OrpcOutputs } from "@/integrations/orpc/client";
 import { RpcFormError } from "@/integrations/orpc/components/rpc-form-error";
 import type { RpcResult } from "@/integrations/orpc/rpc";
 
 import { useFormStatus } from "react-dom";
 
 import { TagsCombobox } from "../tags/tags-combobox";
-
-type SelectBookmarksOutput = OrpcOutputs["bookmarks"]["selectBookmarks"];
-type BookmarkOutput = SelectBookmarksOutput["bookmarks"][0];
+import type { BookmarkOutput } from "./services/actions";
 
 type BookmarkFieldsProps = {
   initialData?: Partial<BookmarkOutput>;

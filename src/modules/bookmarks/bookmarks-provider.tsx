@@ -8,21 +8,21 @@ import {
 
 import {
   selectBookmarksQuery,
-  type SelectBookmarksQueryArgs,
+  type SelectBookmarksQueryInput,
   type SelectBookmarksQueryOutput,
 } from "./services/actions";
 
 type BookmarksContextValue = {
   promise: Promise<SelectBookmarksQueryOutput>;
-  args: SelectBookmarksQueryArgs;
+  args: SelectBookmarksQueryInput;
   invalidate: () => void;
-  update: (args: SelectBookmarksQueryArgs) => void;
+  update: (args: SelectBookmarksQueryInput) => void;
 };
 
 const BookmarksContext = createContext<BookmarksContextValue | null>(null);
 
 type BookmarksProviderProps = PropsWithChildren<{
-  initialArgs: SelectBookmarksQueryArgs;
+  initialArgs: SelectBookmarksQueryInput;
 }>;
 
 export const BookmarksProvider = ({
@@ -42,7 +42,7 @@ export const BookmarksProvider = ({
       }));
     };
 
-    const update = (args: SelectBookmarksQueryArgs) => {
+    const update = (args: SelectBookmarksQueryInput) => {
       setBookmarksQuery({
         args,
         promise: selectBookmarksQuery(args),

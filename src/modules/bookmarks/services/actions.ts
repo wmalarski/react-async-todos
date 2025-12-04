@@ -10,12 +10,13 @@ import * as v from "valibot";
 
 import { insertBookmarkSchema } from "./validation";
 
-export type SelectBookmarksQueryArgs =
+export type SelectBookmarksQueryInput =
   OrpcInputs["bookmarks"]["selectBookmarks"];
 export type SelectBookmarksQueryOutput =
   OrpcOutputs["bookmarks"]["selectBookmarks"];
+export type BookmarkOutput = SelectBookmarksQueryOutput["data"]["bookmarks"][0];
 
-export const selectBookmarksQuery = async (args: SelectBookmarksQueryArgs) => {
+export const selectBookmarksQuery = async (args: SelectBookmarksQueryInput) => {
   return orpc.bookmarks.selectBookmarks(args);
 };
 
