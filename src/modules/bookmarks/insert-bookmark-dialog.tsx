@@ -17,6 +17,7 @@ import { useFormStatus } from "react-dom";
 import { BookmarkFields } from "./bookmark-fields";
 import { useBookmarksContext } from "./bookmarks-provider";
 import { insertBookmarkMutation } from "./services/actions";
+import { STATUS_NEW } from "./services/constansts";
 
 export const InsertBookmarkDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,7 +25,7 @@ export const InsertBookmarkDialog = () => {
   const bookmarksContext = useBookmarksContext();
 
   const successAction = () => {
-    bookmarksContext.invalidate();
+    bookmarksContext.invalidate([STATUS_NEW]);
   };
 
   return (
