@@ -1,7 +1,14 @@
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useDateFormatter } from "@/components/utils/use-date-formatter";
 
-import { use, useMemo } from "react";
+import { type PropsWithChildren, use, useMemo } from "react";
 
 import type { TagOutput } from "../tags/services/actions";
 import { useTagsContext } from "../tags/tags-provider";
@@ -10,7 +17,10 @@ import {
   useBookmarksContext,
 } from "./bookmarks-provider";
 import type { BookmarkOutput } from "./services/actions";
-import { BOOKMARK_STATUSES } from "./services/constansts";
+import {
+  BOOKMARK_STATUSES,
+  FINISHED_BOOKMARK_STATUSES_SET,
+} from "./services/constansts";
 import type { BookmarkStatus } from "./services/types";
 
 export const BookmarkList = () => {
@@ -67,15 +77,27 @@ type BookmarkCardProps = {
 };
 
 const BookmarkCard = ({ bookmark }: BookmarkCardProps) => {
+  const formatDate = useDateFormatter();
+
   return (
     <Card>
       <CardHeader>
         <BookmarkTags bookmark={bookmark} />
         <CardTitle>{bookmark.title}</CardTitle>
+        <CardDescription>{bookmark.text}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <pre>{JSON.stringify(bookmark, null, 2)}</pre>
-      </CardContent>
+      {FINISHED_BOOKMARK_STATUSES_SET.has(bookmark.status) && (
+        <CardContent>
+          <pre>{JSON.stringify(bookmark, null, 2)}</pre>
+          <CardDetailsPair heading="Note">{bookmark.note}</CardDetailsPair>
+          <CardDetailsPair heading="Rate">{bookmark.rate}</CardDetailsPair>
+          {bookmark.doneAt && (
+            <CardDetailsPair heading="Done at">
+              {formatDate(bookmark.doneAt)}
+            </CardDetailsPair>
+          )}
+        </CardContent>
+      )}
     </Card>
   );
 };
@@ -113,5 +135,18 @@ const BookmarkTags = ({ bookmark }: BookmarkTagsProps) => {
         <Badge key={tag.id}>{tag.name}</Badge>
       ))}
     </div>
+  );
+};
+
+type CardDetailsPairProps = PropsWithChildren<{
+  heading: string;
+}>;
+
+const CardDetailsPair = ({ heading, children }: CardDetailsPairProps) => {
+  return (
+    <>
+      <strong className="text-xs">{heading}</strong>
+      <span className="text-muted text-xs">{children}</span>
+    </>
   );
 };
