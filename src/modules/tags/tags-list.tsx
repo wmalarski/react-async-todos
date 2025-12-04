@@ -103,7 +103,7 @@ const TagDialog = ({ tag, onInvalidate }: TagDialogProps) => {
     startUpdateTransition(async () => {
       const result = await updateTagMutation(formData);
 
-      startUpdateTransition(() => {
+      startUpdateTransition(async () => {
         setResult(result);
         if (result.success) {
           onSuccess();
@@ -161,7 +161,7 @@ const DeleteTagForm = ({ tag, onSuccess }: DeleteTagFormProps) => {
   const deleteAction = async (formData: FormData) => {
     const result = await deleteTagMutation(formData);
 
-    startTransition(() => {
+    startTransition(async () => {
       if (result.success) {
         onSuccess();
       }
@@ -199,7 +199,7 @@ const InsertTagDialog = ({ onSuccess }: InsertTagDialogProps) => {
   const insertTagAction = async (formData: FormData) => {
     const result = await insertTagMutation(formData);
 
-    startTransition(() => {
+    startTransition(async () => {
       setResult(result);
 
       if (result.success) {

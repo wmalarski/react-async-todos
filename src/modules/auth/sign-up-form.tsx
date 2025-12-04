@@ -22,7 +22,7 @@ export const SignUpForm = ({ onSignInClick }: SignUpFormProps) => {
   const action = async (formData: FormData) => {
     const result = await signUpMutation(formData);
 
-    startTransition(() => {
+    startTransition(async () => {
       setResult(result ?? undefined);
 
       if (!result) {

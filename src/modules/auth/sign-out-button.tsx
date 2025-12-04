@@ -14,7 +14,7 @@ export const SignOutButton = () => {
   const signOutAction = async () => {
     await signOutMutation();
 
-    startTransition(() => {
+    startTransition(async () => {
       userContext.invalidate();
     });
   };

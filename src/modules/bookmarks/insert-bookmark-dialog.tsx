@@ -64,7 +64,7 @@ const InsertBookmarkForm = ({
   const insertBookmarkAction = async (formData: FormData) => {
     const result = await insertBookmarkMutation(formData);
 
-    startTransition(() => {
+    startTransition(async () => {
       setResult(result);
 
       if (result.success) {

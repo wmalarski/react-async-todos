@@ -1,17 +1,11 @@
 import { Spinner } from "@/components/ui/spinner";
-import { orpc } from "@/integrations/orpc/client";
-import { rpcSuccessResult } from "@/integrations/orpc/rpc";
 
 import { type PropsWithChildren, Suspense, use, useState } from "react";
 
+import { getUserQuery } from "./services/actions";
 import { SignInForm } from "./sign-in-form";
 import { SignUpForm } from "./sign-up-form";
 import { UserContextProvider } from "./user-context";
-
-const getUserQuery = async () => {
-  const user = await orpc.auth.getUser();
-  return rpcSuccessResult(user);
-};
 
 export const ProtectedLayout = ({ children }: PropsWithChildren) => {
   const [userQuery, setUserQuery] = useState(() => getUserQuery());
