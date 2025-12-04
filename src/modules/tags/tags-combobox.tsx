@@ -13,23 +13,11 @@ import {
   ComboboxValue,
 } from "@/components/ui/combobox";
 import { Label } from "@/components/ui/label";
-import { Spinner } from "@/components/ui/spinner";
 
-import {
-  Fragment,
-  Suspense,
-  use,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Fragment, use, useId, useMemo, useRef } from "react";
 
-import {
-  type SelectTagsOutput,
-  selectTagsQuery,
-  type TagOutput,
-} from "./services/actions";
+import type { TagOutput } from "./services/actions";
+import { useTagsContext } from "./tags-provider";
 
 type TagsComboboxProps = {
   initialTagIds?: string[];
@@ -42,34 +30,9 @@ export const TagsCombobox = ({
   disabled,
   initialTagIds,
 }: TagsComboboxProps) => {
-  const [tagsQuery] = useState(() => selectTagsQuery());
+  const tagsContext = useTagsContext();
 
-  return (
-    <Suspense fallback={<Spinner />}>
-      <TagsComboboxInternal
-        disabled={disabled}
-        initialTagIds={initialTagIds}
-        name={name}
-        tagsQuery={tagsQuery}
-      />
-    </Suspense>
-  );
-};
-
-type TagsComboboxInternalProps = {
-  tagsQuery: Promise<SelectTagsOutput>;
-  initialTagIds?: string[];
-  name: string;
-  disabled?: boolean;
-};
-
-const TagsComboboxInternal = ({
-  tagsQuery,
-  name,
-  disabled,
-  initialTagIds,
-}: TagsComboboxInternalProps) => {
-  const tags = use(tagsQuery);
+  const tags = use(tagsContext.promise);
 
   const id = useId();
   const containerRef = useRef<HTMLDivElement | null>(null);

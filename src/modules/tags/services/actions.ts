@@ -14,8 +14,8 @@ export const selectTagsQuery = async () => {
   return orpc.tags.selectTags({ page: 0 });
 };
 
-export type SelectTagsOutput = OrpcOutputs["tags"]["selectTags"];
-export type TagOutput = SelectTagsOutput[0];
+export type SelectTagsQueryOutput = OrpcOutputs["tags"]["selectTags"];
+export type TagOutput = SelectTagsQueryOutput[0];
 
 export const updateTagMutation = async (formData: FormData) => {
   const parsed = v.safeParse(updateTagSchema, decode(formData));

@@ -6,9 +6,11 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { RpcFormError } from "@/integrations/orpc/components/rpc-form-error";
 import type { RpcResult } from "@/integrations/orpc/rpc";
 
+import { Suspense } from "react";
 import { useFormStatus } from "react-dom";
 
 import { TagsCombobox } from "../tags/tags-combobox";
@@ -95,11 +97,13 @@ export const BookmarkFields = ({
           <FieldError>{rpcFailure?.errors?.preview}</FieldError>
         </Field>
 
-        <TagsCombobox
-          disabled={pending}
-          initialTagIds={initialData?.tags?.map((tag) => tag.id)}
-          name="tags"
-        />
+        <Suspense fallback={<Spinner />}>
+          <TagsCombobox
+            disabled={pending}
+            initialTagIds={initialData?.tags?.map((tag) => tag.id)}
+            name="tags"
+          />
+        </Suspense>
       </FieldGroup>
     </FieldSet>
   );

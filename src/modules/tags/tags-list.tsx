@@ -26,7 +26,6 @@ import { PlusIcon } from "lucide-react";
 import {
   type ComponentProps,
   startTransition,
-  Suspense,
   use,
   useId,
   useState,
@@ -37,44 +36,26 @@ import { useFormStatus } from "react-dom";
 import {
   deleteTagMutation,
   insertTagMutation,
-  type SelectTagsOutput,
-  selectTagsQuery,
   type TagOutput,
   updateTagMutation,
 } from "./services/actions";
+import { useTagsContext } from "./tags-provider";
 
 export const TagsList = () => {
-  const [tagsQuery, setTagsQuery] = useState(() => selectTagsQuery());
+  const tagsContext = useTagsContext();
 
-  const onInvalidate = () => {
-    setTagsQuery(selectTagsQuery());
-  };
-
-  return (
-    <Suspense fallback={<Spinner />}>
-      <TagsListContent onInvalidate={onInvalidate} tagsQuery={tagsQuery} />
-    </Suspense>
-  );
-};
-
-type TagsListContentProps = {
-  tagsQuery: Promise<SelectTagsOutput>;
-  onInvalidate: () => void;
-};
-
-const TagsListContent = ({ tagsQuery, onInvalidate }: TagsListContentProps) => {
-  const tags = use(tagsQuery);
+  const tags = use(tagsContext.promise);
 
   return (
     <ScrollArea className="w-[calc(100vw-1rem)]">
       <ul className="flex gap-1">
         {tags.map((tag) => (
           <li key={tag.id}>
-            <TagDialog onInvalidate={onInvalidate} tag={tag} />
+            <TagDialog onInvalidate={tagsContext.invalidate} tag={tag} />
           </li>
         ))}
         <li>
-          <InsertTagDialog onSuccess={onInvalidate} />
+          <InsertTagDialog onSuccess={tagsContext.invalidate} />
         </li>
       </ul>
       <ScrollBar orientation="horizontal" />
