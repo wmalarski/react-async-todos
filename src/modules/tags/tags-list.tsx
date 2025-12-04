@@ -19,34 +19,29 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
-import { orpc } from "@/integrations/orpc/client";
 import { RpcFormError } from "@/integrations/orpc/components/rpc-form-error";
-import {
-  type RpcFailure,
-  type RpcResult,
-  rpcParseIssueResult,
-} from "@/integrations/orpc/rpc";
+import type { RpcFailure, RpcResult } from "@/integrations/orpc/rpc";
 
-import { decode } from "decode-formdata";
 import { PlusIcon } from "lucide-react";
 import {
   type ComponentProps,
-  Suspense,
   startTransition,
+  Suspense,
   use,
   useId,
   useState,
   useTransition,
 } from "react";
 import { useFormStatus } from "react-dom";
-import * as v from "valibot";
 
 import {
+  deleteTagMutation,
+  insertTagMutation,
   type SelectTagsOutput,
-  type TagOutput,
   selectTagsQuery,
+  type TagOutput,
+  updateTagMutation,
 } from "./services/actions";
-import { insertTagSchema, updateTagSchema } from "./services/validation";
 
 export const TagsList = () => {
   const [tagsQuery, setTagsQuery] = useState(() => selectTagsQuery());
@@ -106,18 +101,10 @@ const TagDialog = ({ tag, onInvalidate }: TagDialogProps) => {
     const formData = new FormData(event.currentTarget);
 
     startUpdateTransition(async () => {
-      const parsed = v.safeParse(updateTagSchema, decode(formData));
-
-      if (!parsed.success) {
-        setResult(rpcParseIssueResult(parsed.issues));
-        return;
-      }
-
-      const result = await orpc.tags.updateTag(parsed.output);
+      const result = await updateTagMutation(formData);
 
       startUpdateTransition(() => {
         setResult(result);
-
         if (result.success) {
           onSuccess();
         }
@@ -171,8 +158,8 @@ type DeleteTagFormProps = {
 };
 
 const DeleteTagForm = ({ tag, onSuccess }: DeleteTagFormProps) => {
-  const deleteAction = async () => {
-    const result = await orpc.tags.deleteTag({ tagId: tag.id });
+  const deleteAction = async (formData: FormData) => {
+    const result = await deleteTagMutation(formData);
 
     startTransition(() => {
       if (result.success) {
@@ -183,6 +170,7 @@ const DeleteTagForm = ({ tag, onSuccess }: DeleteTagFormProps) => {
 
   return (
     <form action={deleteAction}>
+      <input name="tagId" type="hidden" value={tag.id} />
       <DeleteTagFormContent />
     </form>
   );
@@ -208,15 +196,8 @@ const InsertTagDialog = ({ onSuccess }: InsertTagDialogProps) => {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const insertTagAction = async (form: FormData) => {
-    const parsed = v.safeParse(insertTagSchema, decode(form));
-
-    if (!parsed.success) {
-      setResult(rpcParseIssueResult(parsed.issues));
-      return;
-    }
-
-    const result = await orpc.tags.insertTag(parsed.output);
+  const insertTagAction = async (formData: FormData) => {
+    const result = await insertTagMutation(formData);
 
     startTransition(() => {
       setResult(result);

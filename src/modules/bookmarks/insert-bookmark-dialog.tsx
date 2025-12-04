@@ -8,17 +8,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { orpc } from "@/integrations/orpc/client";
-import { type RpcResult, rpcParseIssueResult } from "@/integrations/orpc/rpc";
+import type { RpcResult } from "@/integrations/orpc/rpc";
 
-import { decode } from "decode-formdata";
 import { PlusIcon } from "lucide-react";
 import { startTransition, useState } from "react";
 import { useFormStatus } from "react-dom";
-import * as v from "valibot";
 
 import { BookmarkFields } from "./bookmark-fields";
-import { insertBookmarkSchema } from "./services/validation";
+import { insertBookmarkMutation } from "./services/actions";
 
 type InsertBookmarkDialogProps = {
   successAction: () => void;
@@ -64,20 +61,8 @@ const InsertBookmarkForm = ({
 }: InsertBookmarkFormProps) => {
   const [result, setResult] = useState<RpcResult>();
 
-  const insertBookmarkAction = async (form: FormData) => {
-    const parsed = v.safeParse(
-      insertBookmarkSchema,
-      decode(form, { arrays: ["tags"] }),
-    );
-
-    console.log("[parsed]", parsed);
-
-    if (!parsed.success) {
-      setResult(rpcParseIssueResult(parsed.issues));
-      return;
-    }
-
-    const result = await orpc.bookmarks.insertBookmark(parsed.output);
+  const insertBookmarkAction = async (formData: FormData) => {
+    const result = await insertBookmarkMutation(formData);
 
     startTransition(() => {
       setResult(result);

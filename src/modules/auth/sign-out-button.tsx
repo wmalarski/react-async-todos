@@ -1,18 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { orpc } from "@/integrations/orpc/client";
 
 import { LogOutIcon } from "lucide-react";
 import { startTransition } from "react";
 import { useFormStatus } from "react-dom";
 
+import { signOutMutation } from "./services/actions";
 import { useUserContext } from "./user-context";
 
 export const SignOutButton = () => {
   const userContext = useUserContext();
 
   const signOutAction = async () => {
-    await orpc.auth.signOut();
+    await signOutMutation();
 
     startTransition(() => {
       userContext.invalidate();
