@@ -18,7 +18,7 @@ type UserContextValue = {
   invalidate: () => void;
 } | null;
 
-export const UserContext = createContext<UserContextValue>(null);
+const UserContext = createContext<UserContextValue>(null);
 
 export const UserContextProvider = ({ children }: PropsWithChildren) => {
   const [userQuery, setUserQuery] = useState(() => getUserQuery());

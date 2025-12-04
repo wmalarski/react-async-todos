@@ -1,13 +1,12 @@
 import {
   createContext,
   type PropsWithChildren,
-  useCallback,
   useContext,
   useMemo,
-  useReducer,
-  useRef,
+  useState,
 } from "react";
 
+import { useUserContext } from "../auth/user-context";
 import {
   selectTagsQuery,
   type SelectTagsQueryOutput,
@@ -21,32 +20,19 @@ type TagsContextValue = {
 const TagsContext = createContext<TagsContextValue | null>(null);
 
 export const TagsProvider = ({ children }: PropsWithChildren) => {
-  const [_counter, rerender] = useReducer((current) => current + 1, 0);
+  const userContext = useUserContext();
 
-  //   const [tagsQuery, setTagsQuery] = useState(() => selectTagsQuery());
-
-  const promise = useRef<Promise<SelectTagsQueryOutput> | null>(null);
-
-  const getPromise = useCallback(() => {
-    if (!promise.current) {
-      promise.current = selectTagsQuery();
-    }
-    return promise.current;
-  }, []);
-
-  const invalidate = useCallback(() => {
-    promise.current = selectTagsQuery();
-    rerender();
-  }, []);
+  const [tagsQuery, setTagsQuery] = useState(() =>
+    userContext.user.then(() => selectTagsQuery()),
+  );
 
   const value = useMemo(() => {
-    return {
-      invalidate,
-      get promise() {
-        return getPromise();
-      },
+    const invalidate = () => {
+      setTagsQuery(selectTagsQuery());
     };
-  }, [getPromise, invalidate]);
+
+    return { invalidate, promise: tagsQuery };
+  }, [tagsQuery]);
 
   return <TagsContext value={value}>{children}</TagsContext>;
 };

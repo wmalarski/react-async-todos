@@ -1,4 +1,10 @@
-import { type PropsWithChildren, use, useState } from "react";
+import {
+  createContext,
+  type PropsWithChildren,
+  use,
+  useContext,
+  useState,
+} from "react";
 
 import { SignInForm } from "./sign-in-form";
 import { SignUpForm } from "./sign-up-form";
@@ -9,7 +15,11 @@ export const ProtectedLayout = ({ children }: PropsWithChildren) => {
 
   const user = use(userContext.user);
 
-  return <>{user.data.user ? children : <UnauthorizedRouting />}</>;
+  return (
+    <LoggedInContextProvider isLoggedIn={Boolean(user.data.user)}>
+      {user.data.user ? children : <UnauthorizedRouting />}
+    </LoggedInContextProvider>
+  );
 };
 
 export const UnauthorizedRouting = () => {
@@ -24,4 +34,31 @@ export const UnauthorizedRouting = () => {
   }
 
   return <SignUpForm onSignInClick={onToggleView} />;
+};
+
+type LoggedInContextValue = {
+  isLoggedIn: boolean;
+} | null;
+
+const LoggedInContext = createContext<LoggedInContextValue>(null);
+
+type LoggedInContextProviderProps = PropsWithChildren<{
+  isLoggedIn: boolean;
+}>;
+
+const LoggedInContextProvider = ({
+  children,
+  isLoggedIn,
+}: LoggedInContextProviderProps) => {
+  return <LoggedInContext value={{ isLoggedIn }}>{children}</LoggedInContext>;
+};
+
+export const useIsLoggedIn = () => {
+  const context = useContext(LoggedInContext);
+
+  if (!context) {
+    throw new Error("LoggedInContext is not defined");
+  }
+
+  return context.isLoggedIn;
 };
