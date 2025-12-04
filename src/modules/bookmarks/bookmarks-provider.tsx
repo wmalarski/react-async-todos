@@ -4,7 +4,8 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useState,
+  useReducer,
+  useRef,
 } from "react";
 
 import {
@@ -45,38 +46,74 @@ const getStatusInitials = (
 };
 
 export const BookmarksProvider = ({ children }: PropsWithChildren) => {
-  const [status, setStatus] = useState((): BookmarksContextValue["status"] => {
-    return getStatusInitials(BOOKMARK_STATUSES);
-  });
+  const [_counter, rerender] = useReducer((current) => current + 1, 0);
 
-  const invalidate = useCallback((statuses: BookmarkStatus[]) => {
-    setStatus((current) => ({
-      ...current,
-      ...getStatusInitials(statuses),
-    }));
+  const status = useRef<BookmarksContextValue["status"] | null>(null);
+
+  const getStatus = useCallback(() => {
+    if (!status.current) {
+      status.current = getStatusInitials(BOOKMARK_STATUSES);
+    }
+    return status.current;
   }, []);
 
-  const invalidateAll = useCallback((query?: string) => {
-    setStatus((current) => ({
-      ...current,
-      ...getStatusInitials(BOOKMARK_STATUSES, query),
-    }));
-  }, []);
+  const setStatus = useCallback(
+    (
+      next: (
+        current: BookmarksContextValue["status"],
+      ) => BookmarksContextValue["status"],
+    ) => {
+      const currentStatus = getStatus();
+      status.current = next(currentStatus);
+      rerender();
+    },
+    [getStatus],
+  );
 
-  const loadMore = useCallback((status: BookmarkStatus) => {
-    setStatus((current) => {
-      const entry = current[status];
-      const lastArgs = entry[entry.length - 1].args;
-      const args = { ...lastArgs, page: (lastArgs.page ?? 0) + 1 };
-      const newPage = { args, promise: selectBookmarksQuery(args) };
-      const copy = [...entry, newPage];
-      return { ...current, [status]: copy };
-    });
-  }, []);
+  const invalidate = useCallback(
+    (statuses: BookmarkStatus[]) => {
+      setStatus((current) => ({
+        ...current,
+        ...getStatusInitials(statuses),
+      }));
+    },
+    [setStatus],
+  );
+
+  const invalidateAll = useCallback(
+    (query?: string) => {
+      setStatus((current) => ({
+        ...current,
+        ...getStatusInitials(BOOKMARK_STATUSES, query),
+      }));
+    },
+    [setStatus],
+  );
+
+  const loadMore = useCallback(
+    (status: BookmarkStatus) => {
+      setStatus((current) => {
+        const entry = current[status];
+        const lastArgs = entry[entry.length - 1].args;
+        const args = { ...lastArgs, page: (lastArgs.page ?? 0) + 1 };
+        const newPage = { args, promise: selectBookmarksQuery(args) };
+        const copy = [...entry, newPage];
+        return { ...current, [status]: copy };
+      });
+    },
+    [setStatus],
+  );
 
   const value = useMemo(
-    () => ({ invalidate, invalidateAll, loadMore, status }),
-    [status, invalidate, invalidateAll, loadMore],
+    () => ({
+      invalidate,
+      invalidateAll,
+      loadMore,
+      get status() {
+        return getStatus();
+      },
+    }),
+    [invalidate, invalidateAll, loadMore, getStatus],
   );
 
   return <BookmarksContext value={value}>{children}</BookmarksContext>;

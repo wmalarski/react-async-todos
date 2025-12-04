@@ -13,24 +13,22 @@ import { TagsProvider } from "./modules/tags/tags-provider";
 export default function App() {
   return (
     <UserContextProvider>
-      <Suspense fallback={<Spinner />}>
-        <ProtectedLayout>
-          <BookmarksProvider>
-            <TagsProvider>
-              <Suspense fallback={<Spinner />}>
-                <main className="grid gap-1 p-2">
-                  <header className="flex gap-1">
-                    <InsertBookmarkDialog />
-                    <SignOutButton />
-                  </header>
-                  <TagsList />
-                  <BookmarkList />
-                </main>
-              </Suspense>
-            </TagsProvider>
-          </BookmarksProvider>
-        </ProtectedLayout>
-      </Suspense>
+      <BookmarksProvider>
+        <TagsProvider>
+          <Suspense fallback={<Spinner />}>
+            <ProtectedLayout>
+              <main className="grid gap-1 p-2">
+                <header className="flex gap-1">
+                  <InsertBookmarkDialog />
+                  <SignOutButton />
+                </header>
+                <TagsList />
+                <BookmarkList />
+              </main>
+            </ProtectedLayout>
+          </Suspense>
+        </TagsProvider>
+      </BookmarksProvider>
     </UserContextProvider>
   );
 }

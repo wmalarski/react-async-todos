@@ -1,9 +1,11 @@
 import {
   createContext,
   type PropsWithChildren,
+  useCallback,
   useContext,
   useMemo,
-  useState,
+  useReducer,
+  useRef,
 } from "react";
 
 import {
@@ -19,15 +21,32 @@ type TagsContextValue = {
 const TagsContext = createContext<TagsContextValue | null>(null);
 
 export const TagsProvider = ({ children }: PropsWithChildren) => {
-  const [tagsQuery, setTagsQuery] = useState(() => selectTagsQuery());
+  const [_counter, rerender] = useReducer((current) => current + 1, 0);
+
+  //   const [tagsQuery, setTagsQuery] = useState(() => selectTagsQuery());
+
+  const promise = useRef<Promise<SelectTagsQueryOutput> | null>(null);
+
+  const getPromise = useCallback(() => {
+    if (!promise.current) {
+      promise.current = selectTagsQuery();
+    }
+    return promise.current;
+  }, []);
+
+  const invalidate = useCallback(() => {
+    promise.current = selectTagsQuery();
+    rerender();
+  }, []);
 
   const value = useMemo(() => {
-    const invalidate = () => {
-      setTagsQuery(selectTagsQuery());
+    return {
+      invalidate,
+      get promise() {
+        return getPromise();
+      },
     };
-
-    return { invalidate, promise: tagsQuery };
-  }, [tagsQuery]);
+  }, [getPromise, invalidate]);
 
   return <TagsContext value={value}>{children}</TagsContext>;
 };
