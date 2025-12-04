@@ -3,7 +3,6 @@ import { bookmark, bookmarkTag } from "@/integrations/drizzle/schema";
 import { osProtectedBase } from "@/integrations/orpc/base";
 import { rpcErrorResult, rpcSuccessResult } from "@/integrations/orpc/rpc";
 
-import { ORPCError } from "@orpc/server";
 import { and, count, eq, inArray, like, or, sql } from "drizzle-orm";
 
 import { STATUS_NEW } from "./constansts";
@@ -172,11 +171,11 @@ const selectBookmarks = osProtectedBase
 
     const totalCount = countResponse[0]?.count ?? bookmarksWithTags.length;
 
-    return {
+    return rpcSuccessResult({
       bookmarks: bookmarksWithTags,
       count: totalCount,
       hasMore: totalCount > offset + SELECT_BOOKMARKS_DEFAULT_LIMIT,
-    };
+    });
   });
 
 const insertBookmark = osProtectedBase
@@ -225,10 +224,10 @@ const deleteBookmark = osProtectedBase
       );
 
     if (response.error) {
-      throw new ORPCError("BAD_REQUEST", response.error);
+      return rpcErrorResult(response.error);
     }
 
-    return { success: response.success };
+    return rpcSuccessResult({});
   });
 
 const updateBookmark = osProtectedBase
@@ -244,7 +243,7 @@ const updateBookmark = osProtectedBase
       );
 
     if (response.error) {
-      throw new ORPCError("BAD_REQUEST", response.error);
+      return rpcErrorResult(response.error);
     }
 
     const bookmarkTags = await context.db
@@ -266,14 +265,14 @@ const updateBookmark = osProtectedBase
     });
 
     if (deleteResponse?.error) {
-      throw new ORPCError("BAD_REQUEST", deleteResponse.error);
+      return rpcErrorResult(deleteResponse.error);
     }
 
     if (insertResponse?.error) {
-      throw new ORPCError("BAD_REQUEST", insertResponse.error);
+      return rpcErrorResult(insertResponse.error);
     }
 
-    return { success: insertResponse?.success };
+    return rpcSuccessResult({});
   });
 
 const completeBookmark = osProtectedBase
@@ -289,10 +288,10 @@ const completeBookmark = osProtectedBase
       );
 
     if (response.error) {
-      throw new ORPCError("BAD_REQUEST", response.error);
+      return rpcErrorResult(response.error);
     }
 
-    return { success: response.success };
+    return rpcSuccessResult({});
   });
 
 export const bookmarksRpcRouter = {
