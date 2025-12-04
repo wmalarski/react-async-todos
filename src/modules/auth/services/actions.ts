@@ -1,5 +1,5 @@
-import { orpc } from "@/integrations/orpc/client";
-import { rpcParseIssueResult, rpcSuccessResult } from "@/integrations/orpc/rpc";
+import { type OrpcOutputs, orpc } from "@/integrations/orpc/client";
+import { rpcParseIssueResult } from "@/integrations/orpc/rpc";
 
 import { decode } from "decode-formdata";
 import * as v from "valibot";
@@ -7,9 +7,10 @@ import * as v from "valibot";
 import { signInSchema, signUpSchema } from "./validation";
 
 export const getUserQuery = async () => {
-  const user = await orpc.auth.getUser();
-  return rpcSuccessResult(user);
+  return orpc.auth.getUser();
 };
+
+export type UserQueryOutput = OrpcOutputs["auth"]["getUser"];
 
 export const signInMutation = async (formData: FormData) => {
   const parsed = await v.safeParseAsync(signInSchema, decode(formData));

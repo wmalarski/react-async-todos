@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Spinner } from "./components/ui/spinner";
 import { ProtectedLayout } from "./modules/auth/protected-layout";
 import { SignOutButton } from "./modules/auth/sign-out-button";
+import { UserContextProvider } from "./modules/auth/user-context";
 import { BookmarkList } from "./modules/bookmarks/bookmark-list";
 import { BookmarksProvider } from "./modules/bookmarks/bookmarks-provider";
 import { InsertBookmarkDialog } from "./modules/bookmarks/insert-bookmark-dialog";
@@ -11,21 +12,23 @@ import { TagsProvider } from "./modules/tags/tags-provider";
 
 export default function App() {
   return (
-    <ProtectedLayout>
+    <UserContextProvider>
       <BookmarksProvider>
         <TagsProvider>
-          <main className="grid gap-1 p-2">
-            <header className="flex gap-1">
-              <InsertBookmarkDialog />
-              <SignOutButton />
-            </header>
-            <Suspense fallback={<Spinner />}>
-              <TagsList />
-              <BookmarkList />
-            </Suspense>
-          </main>
+          <Suspense fallback={<Spinner />}>
+            <ProtectedLayout>
+              <main className="grid gap-1 p-2">
+                <header className="flex gap-1">
+                  <InsertBookmarkDialog />
+                  <SignOutButton />
+                </header>
+                <TagsList />
+                <BookmarkList />
+              </main>
+            </ProtectedLayout>
+          </Suspense>
         </TagsProvider>
       </BookmarksProvider>
-    </ProtectedLayout>
+    </UserContextProvider>
   );
 }

@@ -3,33 +3,34 @@ import type { OrpcOutputs } from "@/integrations/orpc/client";
 import {
   createContext,
   type PropsWithChildren,
+  useCallback,
   useContext,
-  useEffectEvent,
   useMemo,
+  useState,
 } from "react";
+
+import { getUserQuery, type UserQueryOutput } from "./services/actions";
 
 export type User = OrpcOutputs["auth"]["getUser"];
 
 type UserContextValue = {
-  user: User | null;
+  user: Promise<UserQueryOutput>;
   invalidate: () => void;
 } | null;
 
 export const UserContext = createContext<UserContextValue>(null);
 
-type UserContextProviderProps = PropsWithChildren<{
-  user: User | null;
-  onInvalidate: () => void;
-}>;
+export const UserContextProvider = ({ children }: PropsWithChildren) => {
+  const [userQuery, setUserQuery] = useState(() => getUserQuery());
 
-export const UserContextProvider = ({
-  children,
-  user,
-  onInvalidate,
-}: UserContextProviderProps) => {
-  const invalidate = useEffectEvent(onInvalidate);
+  const invalidate = useCallback(() => {
+    setUserQuery(getUserQuery());
+  }, []);
 
-  const value = useMemo(() => ({ invalidate, user }), [user]);
+  const value = useMemo(
+    () => ({ invalidate, user: userQuery }),
+    [userQuery, invalidate],
+  );
 
   return <UserContext value={value}>{children}</UserContext>;
 };

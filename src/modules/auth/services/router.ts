@@ -1,11 +1,12 @@
 import { type ORPCContext, osBase } from "@/integrations/orpc/base";
+import { rpcSuccessResult } from "@/integrations/orpc/rpc";
 
 import { APIError } from "better-auth";
 
 import { signInSchema, signUpSchema } from "./validation";
 
 const getUser = osBase.handler(async ({ context }) => {
-  return context.user;
+  return rpcSuccessResult({ user: context.user });
 });
 
 const setResHeaders = (context: ORPCContext, headers: Headers) => {
