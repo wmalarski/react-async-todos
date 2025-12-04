@@ -1,10 +1,23 @@
-import { orpc } from "@/integrations/orpc/client";
+import {
+  type OrpcInputs,
+  type OrpcOutputs,
+  orpc,
+} from "@/integrations/orpc/client";
 import { rpcParseIssueResult } from "@/integrations/orpc/rpc";
 
 import { decode } from "decode-formdata";
 import * as v from "valibot";
 
 import { insertBookmarkSchema } from "./validation";
+
+export type SelectBookmarksQueryArgs =
+  OrpcInputs["bookmarks"]["selectBookmarks"];
+export type SelectBookmarksQueryOutput =
+  OrpcOutputs["bookmarks"]["selectBookmarks"];
+
+export const selectBookmarksQuery = async (args: SelectBookmarksQueryArgs) => {
+  return orpc.bookmarks.selectBookmarks(args);
+};
 
 export const insertBookmarkMutation = async (formData: FormData) => {
   const parsed = v.safeParse(
