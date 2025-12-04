@@ -23,7 +23,7 @@ export const TagsProvider = ({ children }: PropsWithChildren) => {
   const userContext = useUserContext();
 
   const [tagsQuery, setTagsQuery] = useState(() =>
-    userContext.user.then(() => selectTagsQuery()),
+    userContext.promise.then(() => selectTagsQuery()),
   );
 
   const value = useMemo(() => {

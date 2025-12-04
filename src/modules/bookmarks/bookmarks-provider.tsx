@@ -33,13 +33,13 @@ const BookmarksContext = createContext<BookmarksContextValue | null>(null);
 
 const getInitialArray = (
   args: SelectBookmarksQueryInput,
-  user?: Promise<UserQueryOutput>,
+  userPromise?: Promise<UserQueryOutput>,
 ): BookmarksQueryPage[] => {
   return [
     {
       args,
-      promise: user
-        ? user.then(() => selectBookmarksQuery(args))
+      promise: userPromise
+        ? userPromise.then(() => selectBookmarksQuery(args))
         : selectBookmarksQuery(args),
     },
   ];
@@ -48,18 +48,18 @@ const getInitialArray = (
 type GetStatusInitialsArgs = {
   statuses: readonly BookmarkStatus[];
   query?: string;
-  user?: Promise<UserQueryOutput>;
+  userPromise?: Promise<UserQueryOutput>;
 };
 
 const getStatusInitials = ({
   statuses,
-  user,
+  userPromise,
   query,
 }: GetStatusInitialsArgs) => {
   return Object.fromEntries(
     statuses.map((status) => [
       status,
-      getInitialArray({ query, status }, user),
+      getInitialArray({ query, status }, userPromise),
     ]),
   ) as BookmarksContextValue["status"];
 };
@@ -70,7 +70,7 @@ export const BookmarksProvider = ({ children }: PropsWithChildren) => {
   const [status, setStatus] = useState((): BookmarksContextValue["status"] => {
     return getStatusInitials({
       statuses: BOOKMARK_STATUSES,
-      user: userContext.user,
+      userPromise: userContext.promise,
     });
   });
 

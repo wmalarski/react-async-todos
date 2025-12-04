@@ -1,5 +1,3 @@
-import type { OrpcOutputs } from "@/integrations/orpc/client";
-
 import {
   createContext,
   type PropsWithChildren,
@@ -11,10 +9,8 @@ import {
 
 import { getUserQuery, type UserQueryOutput } from "./services/actions";
 
-export type User = OrpcOutputs["auth"]["getUser"];
-
 type UserContextValue = {
-  user: Promise<UserQueryOutput>;
+  promise: Promise<UserQueryOutput>;
   invalidate: () => void;
 } | null;
 
@@ -28,7 +24,7 @@ export const UserContextProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   const value = useMemo(
-    () => ({ invalidate, user: userQuery }),
+    () => ({ invalidate, promise: userQuery }),
     [userQuery, invalidate],
   );
 
