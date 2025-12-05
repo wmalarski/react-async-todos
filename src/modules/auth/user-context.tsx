@@ -12,9 +12,9 @@ import { getUserQuery, type UserQueryOutput } from "./services/actions";
 type UserContextValue = {
   promise: Promise<UserQueryOutput>;
   invalidate: () => void;
-} | null;
+};
 
-const UserContext = createContext<UserContextValue>(null);
+const UserContext = createContext<UserContextValue | null>(null);
 
 export const UserContextProvider = ({ children }: PropsWithChildren) => {
   const [userQuery, setUserQuery] = useState(() => getUserQuery());
